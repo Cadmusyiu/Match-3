@@ -28,6 +28,45 @@
             transform: scale(1.1);
         }
         
+        /* Animation for matched gems */
+        .gem.matched {
+            animation: matched-pulse 0.5s infinite alternate;
+        }
+        
+        @keyframes matched-pulse {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(1.1); opacity: 0.8; }
+        }
+        
+        @keyframes pulsate {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.2); }
+        }
+        
+        @keyframes sparkle {
+            0% { transform: scale(1); opacity: 0.5; }
+            100% { transform: scale(1.5); opacity: 1; }
+        }
+        
+        /* Sparkles container for matched gems */
+        .sparkle-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 20;
+        }
+        
+        /* Timer pulse animation */
+        #timer-circle {
+            animation: timer-pulse 1s infinite alternate;
+        }
+        
+        @keyframes timer-pulse {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.05); }
+        }
+        
         body {
             margin: 0;
             padding: 0;
@@ -631,7 +670,9 @@
             select: new Audio('data:audio/wav;base64,UklGRiQEAABXQVZFZm10IBAAAAABAAEAESsAABErAAABAAgAZGF0YQAEAAAAAABVgKqA//+/gFVVQAAAQFVVv4D//wAAVYCqgP//v4BVVUAAAEBVVX+A//8AAHDMqoj//7+AMDBAAAAAQDA//4j//wAAAIAAgP//gIAAAAAAAAAAAAAAgP//AACAZY2H//+qgDVVQAAAQDVVqoD//wCGTi6ZiIiIiDg4ODg4ODg4OIiIiIgAhk4umYiIiIg4ODg4ODg4ODiIiIiIAAAAAAD/////AAAAAAAAAAAAAAAA//////8AAAAAAAAAAP//////////////////////////////////////////'),
             match: new Audio('data:audio/wav;base64,UklGRoQDAABXQVZFZm10IBAAAAABAAEAESsAABErAAABAAgAZGF0YWAAAAAAAIB/f39/AACAgICAgP8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAf39/fwAAAAAAAAAAAACAgICAAICAgICAgP+Af39/f38AAACAgICAgP+Af39/f38AAICAgICAgIB/f39/f3+AgICAgICA/4B/f39/fwAAAICAgICA/4B/f39/fwAAgICAgICAgH9/f39/f4CAgICAgID/AH9/f39/f4CAgICAgIAAgH9/f39/AACAgICAgP8Af39/f39/gICAgICAgACAf39/f38AAACAgICA/wB/f39/f3+AgICAgICAAIB/f39/fwAAAICAgID/gH9/f39/f4CAgICAgIAAgH9/f39/AACAgICAgP+Af39/f39/gICAgICAgACAf39/f38AAICAgICA/wBqqmpmZmaAgICAgICA/wB/f39/f3+AgICAgICAAIB/f39/fwAAgICAgID/AH9/f39/f4CAgICAgIAAgH9/f39/AACAgICAgP8Af39/f39/gICAgICAgACAf39/f38AAICAgICA/wB/f39/f3+AgICAgICAAIB/f39/fwAAgICAgICAgH9/f39/f4CAgICAgIAAgH9/f39/AACAgICAgP+Af39/f39/gICAgICAgACAf39/f38AAICAgICA/4B/f39/f3+AgICAgICAAIB/f39/fwAAAICAgID/gH9/f39/f4CAgICAgIAAgH9/f39/AACAgICAgP8Af39/f39/gICAgICAgACAf39/f38AAICAgICA/wB/f39/f3+AgICAgICAAIA='),
             combo: new Audio('data:audio/wav;base64,UklGRhQCAABXQVZFZm10IBAAAAABAAEAESsAABErAAABAAgAZGF0YfABAAAAAAAAVYCqgP//v4BVVUAAAEBVVX+AAAAAAABwzKqI//+/gDAwQAAAAEAwf/8AAAAAAACAgICA//+/gICAAAAAAAAA/wAAAAAAAICAAAD//4CAAP8AAAAAAAD/AAAAP39/fwAAAAAAAAAAAICAgIAAQEB/f38AAAAAAAAAAAD//wAAAP8AAAAAAEB/f3+Af39/f38AAABAQED/AAAAAAB/f39/AP9/f39/f39/f39/f39/f4CAgICA/wAAAH9/f39/f3+AgICAgICAgICAgICA/wAAAH9/f39/f3+AgICAgICAgICAgID/AAAAAAAAAAB/f39/f3+AgICAgIAAAICAgP8AAAAAAAAAAAAAAH9/f39/AAAAAICAgIAAAAAAAAAAAAAAAAAAgICAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAgICAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=='),
-            swap: new Audio('data:audio/wav;base64,UklGRiwCAABXQVZFZm10IBAAAAABAAEAESsAABErAAABAAgAZGF0YQgCAAD//wCAQEBAQACAf3//////////fwB/QEB/fwAAAP//AEB/AAAAAAAAQEAAAEBAAAAAAAAAAAAAAAAAgH9//////////3//f0BAf38AAAD//wBAf39AQEBAAAAAAAAAAAAAAAAAAAAAAAD/fwB/QEAAQACAf3//////////fwB/QEB/fwAAAP//AEB/QEAAAABAQABAAAAAAAAAAAAAAAAAAAAAAAD/fwB/QEAAQACAf39/f39/f39/f39/QEAAAAAAAP//AEAAAABAQEAAgH9/f39/f39/fwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==')
+            swap: new Audio('data:audio/wav;base64,UklGRiwCAABXQVZFZm10IBAAAAABAAEAESsAABErAAABAAgAZGF0YQgCAAD//wCAQEBAQACAf3//////////fwB/QEB/fwAAAP//AEB/AAAAAAAAQEAAAEBAAAAAAAAAAAAAAAAAgH9//////////3//f0BAf38AAAD//wBAf39AQEBAAAAAAAAAAAAAAAAAAAAAAAD/fwB/QEAAQACAf3//////////fwB/QEB/fwAAAP//AEB/QEAAAABAQABAAAAAAAAAAAAAAAAAAAAAAAD/fwB/QEAAQACAf39/f39/f39/f39/QEAAAAAAAP//AEAAAABAQEAAgH9/f39/f39/fwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=='),
+            timer: new Audio('data:audio/wav;base64,UklGRqwCAABXQVZFZm10IBAAAAABAAEARKwAAESsAAABAAgAZGF0YYgCAAAAAAAA//8AAAAA/////wAAAP8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD//////wAAAAAAAAAA/////wAAAAD///////8AAAAA//8AAAAA/////wAAAAD/////AAAAAAAAAAAAAAAAAAAAAAAAAAD/////AAAAAAAAAAD/////AAAAAP///////wAAAAD//wAAAAD/////AAAAAP////8AAAAA//////8AAAAA/////wAAAAD/////AAAAAAAAAAAAAAAAAAAAAAAAAAD/////AAAAAAAAAAD/////AAAAAP///////wAAAAD//wAAAAD/////AAAAAP////8AAAAA//////8AAAAA/////wAAAAD/////AAAAAP////8AAAAAAAAAAP////8AAAAA/////wAAAP8AAAAA/////wAAAAD/////AAAAAP//AAAAAAAAAAD/////AAAAAAAAAAD//wAAAAAAAAAA/////wAAAAD//////wAAAAAAAAAA/////wAAAAD/////AAAAAP////8AAAAAAAAAAP////8AAAAA//////8AAAAAAAAAAP////8AAAAA//////8AAAAAAAAAAP////8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP//AAAAAAAAAAAAAAAA//8AAAAA//8AAAAAAAAAAP//AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/////AAAAAAAAAAD/////AAAAAP///////wAAAAD//wAAAAD/////AAAAAP////8AAAAA')
+        };
         };
         
         // Start a new path from a gem
@@ -680,14 +721,12 @@
             if (!areGemsAdjacent(lastGem.row, lastGem.col, row, col)) return;
             
             // Check if the gem is already in the path
-            const isInPath = gameState.currentPath.some(gem => gem.row === row && gem.col === col);
+            const gemIndex = gameState.currentPath.findIndex(gem => gem.row === row && gem.col === col);
+            const isInPath = gemIndex !== -1;
             
             if (isInPath) {
-                // If it's the second-to-last gem, allow backtracking
-                if (gameState.currentPath.length > 1 && 
-                    gameState.currentPath[gameState.currentPath.length - 2].row === row && 
-                    gameState.currentPath[gameState.currentPath.length - 2].col === col) {
-                    
+                // Only allow backtracking to the previous gem in the path
+                if (gemIndex === gameState.currentPath.length - 2) {
                     // Remove the last gem from the path
                     const removed = gameState.currentPath.pop();
                     const removedElement = gameState.gemElements[removed.row][removed.col];
@@ -837,11 +876,28 @@
                 clearInterval(gameState.pathTimer);
             }
             
+            // Start timer sound
+            sounds.timer.currentTime = 0;
+            sounds.timer.play();
+            
             // Start new timer
             const startTime = Date.now();
+            let lastSecond = PATH_MOVE_TIME;
+            
             gameState.pathTimer = setInterval(() => {
                 const elapsedSeconds = (Date.now() - startTime) / 1000;
                 gameState.pathTimeLeft = Math.max(0, PATH_MOVE_TIME - elapsedSeconds);
+                
+                // Play tick sound when a second passes
+                const currentSecond = Math.ceil(gameState.pathTimeLeft);
+                if (currentSecond < lastSecond) {
+                    lastSecond = currentSecond;
+                    // Play a tick sound for the last 3 seconds
+                    if (currentSecond <= 3 && currentSecond > 0) {
+                        sounds.timer.currentTime = 0;
+                        sounds.timer.play();
+                    }
+                }
                 
                 updateTimerDisplay();
                 
@@ -1102,6 +1158,33 @@
                 setTimeout(() => {
                     comboText.style.animation = '';
                 }, 1500);
+                
+                // Add more intense effects for combos
+                const totalGems = matches.reduce((total, match) => total + match.gems.length, 0);
+                
+                // Create a flash effect
+                const flash = document.createElement('div');
+                flash.style.position = 'absolute';
+                flash.style.top = '0';
+                flash.style.left = '0';
+                flash.style.width = '100%';
+                flash.style.height = '100%';
+                flash.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
+                flash.style.zIndex = '30';
+                flash.style.pointerEvents = 'none';
+                flash.style.animation = 'flash 0.5s';
+                
+                gridContainer.appendChild(flash);
+                
+                setTimeout(() => {
+                    flash.remove();
+                }, 500);
+                
+                // Add special combo animation
+                if (matches.length >= 3) {
+                    // Create particle explosion for big combos
+                    createParticleExplosion(gridContainer, matches.length * 5);
+                }
             }
             
             // Wait for animation before removing
@@ -1537,6 +1620,83 @@
             updateUI();
         }
         
+        // Create particle explosion effect
+        function createParticleExplosion(container, numParticles) {
+            const containerRect = container.getBoundingClientRect();
+            const centerX = containerRect.width / 2;
+            const centerY = containerRect.height / 2;
+            
+            for (let i = 0; i < numParticles; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.position = 'absolute';
+                particle.style.width = '6px';
+                particle.style.height = '6px';
+                particle.style.borderRadius = '50%';
+                particle.style.backgroundColor = getRandomColor();
+                particle.style.zIndex = '40';
+                particle.style.pointerEvents = 'none';
+                
+                // Start at center
+                particle.style.left = centerX + 'px';
+                particle.style.top = centerY + 'px';
+                
+                // Random direction and speed
+                const angle = Math.random() * Math.PI * 2;
+                const speed = 2 + Math.random() * 3;
+                const distance = 30 + Math.random() * 100;
+                
+                const targetX = centerX + Math.cos(angle) * distance;
+                const targetY = centerY + Math.sin(angle) * distance;
+                
+                // Add to container
+                container.appendChild(particle);
+                
+                // Animate the particle
+                let progress = 0;
+                const animateParticle = () => {
+                    progress += 0.02;
+                    
+                    if (progress >= 1) {
+                        particle.remove();
+                        return;
+                    }
+                    
+                    // Ease out
+                    const easeProgress = 1 - Math.pow(1 - progress, 3);
+                    
+                    // Move from center to target
+                    const currentX = centerX + (targetX - centerX) * easeProgress;
+                    const currentY = centerY + (targetY - centerY) * easeProgress;
+                    
+                    // Add gravity effect
+                    const gravity = 100 * progress * progress;
+                    
+                    particle.style.left = currentX + 'px';
+                    particle.style.top = (currentY + gravity) + 'px';
+                    particle.style.opacity = 1 - easeProgress;
+                    
+                    requestAnimationFrame(animateParticle);
+                };
+                
+                requestAnimationFrame(animateParticle);
+            }
+        }
+        
+        // Get random color for particles
+        function getRandomColor() {
+            const colors = [
+                '#ff4500', // fire
+                '#1e90ff', // water
+                '#ff69b4', // heart
+                '#32cd32', // leaf
+                '#ffd700', // star
+                '#9370db'  // moon
+            ];
+            
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+        
         // Add CSS for animations
         const style = document.createElement('style');
         style.textContent = `
@@ -1549,6 +1709,12 @@
                 0%, 100% { transform: translateX(0); }
                 25% { transform: translateX(-5px); }
                 75% { transform: translateX(5px); }
+            }
+            
+            @keyframes flash {
+                0% { opacity: 0.3; }
+                50% { opacity: 0.1; }
+                100% { opacity: 0; }
             }
         `;
         document.head.appendChild(style);
