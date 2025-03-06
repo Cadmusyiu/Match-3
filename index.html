@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Match-3 Dungeon Crawler</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #1a1a1a;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        
+        #game-container {
+            width: 100%;
+            max-width: 500px;
+            background-color: #222;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+        
+        #dungeon-view {
+            height: 200px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="50" height="50" fill="%23333"/><rect x="50" y="50" width="50" height="50" fill="%23333"/><rect x="50" y="0" width="50" height="50" fill="%23444"/><rect x="0" y="50" width="50" height="50" fill="%23444"/></svg>');
+            background-size: 50px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .dungeon-wall {
+            position: absolute;
+            background-color: #555;
+            border: 2px solid #666;
+        }
+        
+        .wall-left, .wall-right {
+            width: 20px;
+            height: 100%;
+            top: 0;
+        }
+        
+        .wall-left {
+            left: 0;
+            background-image: linear-gradient(to right, #444, #555);
+        }
+        
+        .wall-right {
+            right: 0;
+            background-image: linear-gradient(to left, #444, #555);
+        }
+        
+        .wall-top, .wall-bottom {
+            width: 100%;
+            height: 20px;
+        }
+        
+        .wall-top {
+            top: 0;
+            background-image: linear-gradient(to bottom, #444, #555);
+        }
+        
+        .wall-bottom {
+            bottom: 0;
+            background-image: linear-gradient(to top, #444, #555);
+        }
+        
+        .enemy {
+            position: absolute;
+            width: 60px;
+            height: 100px;
+            background-color: rgba(255, 100, 100, 0.8);
+            border-radius: 50% 50% 0 0;
+            animation: float 2s infinite alternate ease-in-out;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .enemy::before {
+            content: "";
+            width: 20px;
+            height: 20px;
+            background-color: white;
+            border-radius: 50%;
+            position: absolute;
+            top: 30px;
+            box-shadow: 30px 0 0 white;
+        }
+        
+        .enemy::after {
+            content: "";
+            width: 30px;
+            height: 10px;
+            background-color: black;
+            position: absolute;
+            top: 60px;
+            border-radius: 5px;
+        }
+        
+        .flame {
+            position: absolute;
+            width: 40px;
+            height: 60px;
+            background: radial-gradient(ellipse at bottom, #ffb800 0%, #ff8000 50%, transparent 100%);
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            animation: flicker 0.5s infinite alternate ease-in-out;
+        }
+        
+        #heroes-area {
+            display: flex;
+            justify-content: space-around;
+            padding: 10px;
+            background-color: #333;
+            border-bottom: 2px solid #444;
+        }
+        
+        .hero-card {
+            width: 60px;
+            height: 80px;
+            background-color: #555;
+            border-radius: 5px;
+            border: 2px solid #777;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .hero-portrait {
+            height: 60%;
+            background-color: #666;
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .hero-stats {
+            height: 40%;
+            background-color: #444;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 12px;
+            color: white;
+        }
+        
+        #status-bar {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 10px;
+            background-color: #222;
+            border-top: 2px solid #444;
+            border-bottom: 2px solid #444;
+        }
+        
+        #health-bar {
+            height: 20px;
+            background-color: #333;
+            border-radius: 10px;
+            overflow: hidden;
+            flex-grow: 1;
+            margin: 0 10px;
+        }
+        
+        #health-fill {
+            height: 100%;
+            background-color: #f25;
+            width: 100%;
+        }
+        
+        #grid-container {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            grid-template-rows: repeat(6, 1fr);
+            gap: 2px;
+            padding: 5px;
+            background-color: #111;
+            aspect-ratio: 1 / 1;
+        }
+        
+        .gem {
+            aspect-ratio: 1 / 1;
+            border-radius: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.2s, opacity 0.2s;
+            background-size: 80%;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        
+        .gem:hover {
+            transform: scale(1.05);
+        }
+        
+        .gem.selected {
+            transform: scale(1.1);
+            box-shadow: 0 0 10px white;
+        }
+        
+        .gem.matched {
+            animation: pulse 0.5s infinite alternate;
+        }
+        
+        .gem.heart {
+            background-color: #FF69B4;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="white" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>');
+        }
+        
+        .gem.fire {
+            background-color: #FF4500;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="white" d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z"/></svg>');
+        }
+        
+        .gem.water {
+            background-color: #1E90FF;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="white" d="M12 2c-5.33 4.55-8 8.48-8 11.8 0 4.98 3.8 8.2 8 8.2s8-3.22 8-8.2c0-3.32-2.67-7.25-8-11.8zm0 18c-3.35 0-6-2.57-6-6.2 0-2.34 1.95-5.44 6-9.14 4.05 3.7 6 6.79 6 9.14 0 3.63-2.65 6.2-6 6.2zm-4-8c0 2.2 1.79 4 4 4 .5 0 .97-.09 1.41-.25-.04-.13-.08-.25-.08-.39 0-2.2-1.79-4-4-4-.5 0-.97.09-1.41.25.04.13.08.25.08.39z"/></svg>');
+        }
+        
+        .gem.star {
+            background-color: #FFD700;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="white" d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>');
+        }
+        
+        .gem.moon {
+            background-color: #9370DB;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="white" d="M12 3c-.46 0-.93.04-1.4.14-2.76.53-4.96 2.76-5.48 5.52-.54 2.77.82 5.35 3.18 6.74-3.4-1.45-5.45-5.08-4.5-8.82C4.7 2.85 7.94.01 11.81 0c.46 0 .93.04 1.4.14 2.76.53 4.96 2.76 5.48 5.52.54 2.77-.82 5.35-3.18 6.74 3.4-1.45 5.45-5.08 4.5-8.82C19.1 2.85 15.87.01 12 0V3z"/></svg>');
+        }
+        
+        .gem.leaf {
+            background-color: #32CD32;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="white" d="M6.05 8.05c-2.73 2.73-2.73 7.15-.02 9.88 1.47-3.4 4.09-6.24 7.36-7.93-2.77 2.34-4.71 5.61-5.39 9.32C9.7 21.68 12.22 22.9 15 22.9c3.87 0 7-3.13 7-7 0-6.93-3.44-9.93-8.57-12.21-2.36 1.29-4.38 3.3-5.67 6.36-1.13-2.54-1.35-5.46-.71-8.45-.9 1.13-1.97 2.39-3 3.45z"/></svg>');
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-10px); }
+        }
+        
+        @keyframes flicker {
+            0% { transform: scale(1); opacity: 0.8; }
+            100% { transform: scale(1.1); opacity: 1; }
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <div id="dungeon-view">
+            <div class="dungeon-wall wall-left"></div>
+            <div class="dungeon-wall wall-right"></div>
+            <div class="dungeon-wall wall-top"></div>
+            <div class="dungeon-wall wall-bottom"></div>
+            
+            <div class="enemy" style="left: 170px; top: 40px;">
+                <div class="health-bar"></div>
+            </div>
+            
+            <div class="flame" style="left: 120px; top: 80px;"></div>
+            <div class="flame" style="right: 120px; top: 80px;"></div>
+        </div>
+        
+        <div id="heroes-area">
+            <div class="hero-card">
+                <div class="hero-portrait" style="background-color: #b58; color: white; display: flex; justify-content: center; align-items: center;">⚔️</div>
+                <div class="hero-stats">10 ⚔️</div>
+            </div>
+            <div class="hero-card">
+                <div class="hero-portrait" style="background-color: #58b; color: white; display: flex; justify-content: center; align-items: center;">🔮</div>
+                <div class="hero-stats">15 🔮</div>
+            </div>
+            <div class="hero-card">
+                <div class="hero-portrait" style="background-color: #5b8; color: white; display: flex; justify-content: center; align-items: center;">💉</div>
+                <div class="hero-stats">5 💉</div>
+            </div>
+        </div>
+        
+        <div id="status-bar">
+            <span>HP:</span>
+            <div id="health-bar">
+                <div id="health-fill"></div>
+            </div>
+            <span>15705/15705</span>
+        </div>
+        
+        <div id="grid-container">
+            <!-- Grid will be filled by JavaScript -->
+        </div>
+    </div>
+
+    <script>
+        // Constants
+        const GRID_SIZE = 6;
+        const GEM_TYPES = [
+            { id: 'heart', color: '#FF69B4', effect: 'heal' },
+            { id: 'fire', color: '#FF4500', effect: 'damage' },
+            { id: 'water', color: '#1E90FF', effect: 'magic' },
+            { id: 'star', color: '#FFD700', effect: 'special' },
+            { id: 'moon', color: '#9370DB', effect: 'status' },
+            { id: 'leaf', color: '#32CD32', effect: 'buff' }
+        ];
+        
+        // Game state
+        let gameState = {
+            grid: [],
+            heroes: [
+                { name: 'Warrior', health: 100, attack: 10 },
+                { name: 'Mage', health: 80, attack: 15 },
+                { name: 'Healer', health: 70, attack: 5 }
+            ],
+            enemies: [
+                { name: 'Enemy', health: 100, maxHealth: 100, attack: 10 }
+            ],
+            health: 15705,
+            maxHealth: 15705,
+            score: 0,
+            selectedGem: null
+        };
+        
+        // DOM elements
+        const gridContainer = document.getElementById('grid-container');
+        const healthFill = document.getElementById('health-fill');
+        
+        // Initialize the grid
+        function initializeGrid() {
+            // Clear grid container
+            gridContainer.innerHTML = '';
+            
+            // Create empty grid in game state
+            gameState.grid = [];
+            for (let row = 0; row < GRID_SIZE; row++) {
+                gameState.grid[row] = [];
+                for (let col = 0; col < GRID_SIZE; col++) {
+                    // Create a random gem
+                    const randomIndex = Math.floor(Math.random() * GEM_TYPES.length);
+                    const gemType = GEM_TYPES[randomIndex];
+                    gameState.grid[row][col] = { ...gemType };
+                    
+                    // Create DOM element for the gem
+                    const gemElement = document.createElement('div');
+                    gemElement.className = `gem ${gemType.id}`;
+                    gemElement.dataset.row = row;
+                    gemElement.dataset.col = col;
+                    gemElement.addEventListener('click', handleGemClick);
+                    
+                    gridContainer.appendChild(gemElement);
+                }
+            }
+            
+            // Check for any initial matches and resolve them
+            const initialMatches = checkMatches();
+            if (initialMatches.length > 0) {
+                processMatches(initialMatches);
+            }
+            
+            updateUI();
+        }
+        
+        // Handle gem click
+        function handleGemClick(event) {
+            const clickedRow = parseInt(event.target.dataset.row);
+            const clickedCol = parseInt(event.target.dataset.col);
+            
+            // If no gem is selected yet
+            if (gameState.selectedGem === null) {
+                gameState.selectedGem = { row: clickedRow, col: clickedCol };
+                event.target.classList.add('selected');
+            } 
+            // If the same gem is clicked again, deselect it
+            else if (gameState.selectedGem.row === clickedRow && gameState.selectedGem.col === clickedCol) {
+                gameState.selectedGem = null;
+                event.target.classList.remove('selected');
+            } 
+            // If another gem is clicked, try to swap
+            else {
+                // Get the previously selected gem element
+                const prevSelected = document.querySelector('.gem.selected');
+                if (prevSelected) {
+                    prevSelected.classList.remove('selected');
+                }
+                
+                // Try to swap
+                const result = swapGems(
+                    gameState.selectedGem.row, 
+                    gameState.selectedGem.col, 
+                    clickedRow, 
+                    clickedCol
+                );
+                
+                // Reset selection
+                gameState.selectedGem = null;
+                
+                // If swap was invalid, show feedback
+                if (!result) {
+                    event.target.classList.add('invalid');
+                    setTimeout(() => {
+                        event.target.classList.remove('invalid');
+                    }, 300);
+                }
+            }
+        }
+        
+        // Check if two gems are adjacent
+        function areGemsAdjacent(row1, col1, row2, col2) {
+            return (
+                (Math.abs(row1 - row2) === 1 && col1 === col2) ||
+                (Math.abs(col1 - col2) === 1 && row1 === row2)
+            );
+        }
+        
+        // Swap gems
+        function swapGems(row1, col1, row2, col2) {
+            // Check if the swap is valid (adjacent gems)
+            if (!areGemsAdjacent(row1, col1, row2, col2)) {
+                return false;
+            }
+            
+            // Get gem information
+            const gem1 = gameState.grid[row1][col1];
+            const gem2 = gameState.grid[row2][col2];
+            
+            // Swap in game state
+            gameState.grid[row1][col1] = gem2;
+            gameState.grid[row2][col2] = gem1;
+            
+            // Check if the swap creates a match
+            const matches = checkMatches();
+            
+            if (matches.length === 0) {
+                // If no match was created, swap back
+                gameState.grid[row1][col1] = gem1;
+                gameState.grid[row2][col2] = gem2;
+                return false;
+            }
+            
+            // Update the UI to show the swap
+            updateGridUI();
+            
+            // Process the matches
+            setTimeout(() => {
+                processMatches(matches);
+            }, 300);
+            
+            return true;
+        }
+        
+        // Check for matches in the grid
+        function checkMatches() {
+            const matches = [];
+            
+            // Check horizontal matches
+            for (let row = 0; row < GRID_SIZE; row++) {
+                for (let col = 0; col < GRID_SIZE - 2; col++) {
+                    const currentType = gameState.grid[row][col].id;
+                    if (
+                        currentType === gameState.grid[row][col + 1].id &&
+                        currentType === gameState.grid[row][col + 2].id
+                    ) {
+                        // Found a horizontal match of at least 3
+                        const matchedGems = [{ row, col }];
+                        let nextCol = col + 1;
+                        
+                        // Extend match if more than 3 in a row
+                        while (
+                            nextCol < GRID_SIZE && 
+                            gameState.grid[row][nextCol].id === currentType
+                        ) {
+                            matchedGems.push({ row, col: nextCol });
+                            nextCol++;
+                        }
+                        
+                        matches.push({
+                            type: currentType,
+                            gems: matchedGems
+                        });
+                        
+                        // Skip the matched gems to avoid duplicate matches
+                        col = nextCol - 1;
+                    }
+                }
+            }
+            
+            // Check vertical matches
+            for (let col = 0; col < GRID_SIZE; col++) {
+                for (let row = 0; row < GRID_SIZE - 2; row++) {
+                    const currentType = gameState.grid[row][col].id;
+                    if (
+                        currentType === gameState.grid[row + 1][col].id &&
+                        currentType === gameState.grid[row + 2][col].id
+                    ) {
+                        // Found a vertical match of at least 3
+                        const matchedGems = [{ row, col }];
+                        let nextRow = row + 1;
+                        
+                        // Extend match if more than 3 in a row
+                        while (
+                            nextRow < GRID_SIZE && 
+                            gameState.grid[nextRow][col].id === currentType
+                        ) {
+                            matchedGems.push({ row: nextRow, col });
+                            nextRow++;
+                        }
+                        
+                        matches.push({
+                            type: currentType,
+                            gems: matchedGems
+                        });
+                        
+                        // Skip the matched gems to avoid duplicate matches
+                        row = nextRow - 1;
+                    }
+                }
+            }
+            
+            return matches;
+        }
+        
+        // Process matches and apply effects
+        function processMatches(matches) {
+            // Highlight matched gems in UI
+            highlightMatches(matches);
+            
+            // Wait for animation before removing
+            setTimeout(() => {
+                // Apply effects based on matches
+                matches.forEach(match => {
+                    applyGemEffect(match.type, match.gems.length);
+                    
+                    // Mark matched gems for removal
+                    match.gems.forEach(gem => {
+                        gameState.grid[gem.row][gem.col] = null;
+                    });
+                });
+                
+                // Update score
+                gameState.score += matches.reduce((total, match) => total + match.gems.length * 10, 0);
+                
+                // Update UI after removing gems
+                updateGridUI();
+                
+                // Wait for removal animation
+                setTimeout(() => {
+                    // Drop gems to fill gaps
+                    dropGems();
+                    
+                    // Check for new matches
+                    const newMatches = checkMatches();
+                    if (newMatches.length > 0) {
+                        // Process chain reactions
+                        processMatches(newMatches);
+                    } else {
+                        // If enemy is defeated, spawn new one
+                        if (gameState.enemies.length === 0 || gameState.enemies[0].health <= 0) {
+                            spawnEnemy();
+                        } else {
+                            // Enemy attacks after player's turn
+                            enemyAttack();
+                        }
+                    }
+                }, 300);
+            }, 500);
+        }
+        
+        // Highlight matches in UI
+        function highlightMatches(matches) {
+            matches.forEach(match => {
+                match.gems.forEach(gem => {
+                    const gemElement = document.querySelector(`.gem[data-row="${gem.row}"][data-col="${gem.col}"]`);
+                    if (gemElement) {
+                        gemElement.classList.add('matched');
+                    }
+                });
+            });
+        }
+        
+        // Apply effects based on gem type and match size
+        function applyGemEffect(gemType, matchSize) {
+            const power = matchSize * 5; // Base power multiplied by match size
+            
+            switch (gemType) {
+                case 'heart':
+                    // Heal the player
+                    gameState.health = Math.min(gameState.health + power * 10, gameState.maxHealth);
+                    showFloatingText(`+${power * 10} HP`, '#5f5');
+                    break;
+                case 'fire':
+                    // Deal damage to enemies
+                    if (gameState.enemies.length > 0) {
+                        gameState.enemies[0].health -= power * 15;
+                        showFloatingText(`-${power * 15} DMG`, '#f55');
+                        
+                        // Create attack animation
+                        createAttackAnimation('fire');
+                    }
+                    break;
+                case 'water':
+                    // Deal magic damage to enemies
+                    if (gameState.enemies.length > 0) {
+                        gameState.enemies[0].health -= power * 12;
+                        showFloatingText(`-${power * 12} MAGIC`, '#55f');
+                        
+                        // Create attack animation
+                        createAttackAnimation('water');
+                    }
+                    break;
+                case 'star':
+                    // Bonus points and small healing
+                    gameState.score += power * 20;
+                    gameState.health = Math.min(gameState.health + power * 5, gameState.maxHealth);
+                    showFloatingText(`+${power * 20} PTS`, '#ff5');
+                    break;
+                case 'moon':
+                    // Weaken enemy attack
+                    if (gameState.enemies.length > 0) {
+                        gameState.enemies[0].attack = Math.max(1, gameState.enemies[0].attack - 1);
+                        showFloatingText(`WEAKEN`, '#b5f');
+                    }
+                    break;
+                case 'leaf':
+                    // Buff heroes attack
+                    gameState.heroes.forEach(hero => {
+                        hero.attack += 1;
+                    });
+                    showFloatingText(`BUFF`, '#5f5');
+                    break;
+            }
+            
+            // Update UI
+            updateUI();
+        }
+        
+        // Create attack animation
+        function createAttackAnimation(type) {
+            if (gameState.enemies.length === 0) return;
+            
+            const dungeon = document.getElementById('dungeon-view');
+            const projectile = document.createElement('div');
+            projectile.className = 'projectile';
+            projectile.style.position = 'absolute';
+            projectile.style.width = '20px';
+            projectile.style.height = '20px';
+            projectile.style.borderRadius = '50%';
+            projectile.style.bottom = '10px';
+            projectile.style.left = '50%';
+            projectile.style.transform = 'translateX(-50%)';
+            
+            if (type === 'fire') {
+                projectile.style.backgroundColor = '#f55';
+                projectile.style.boxShadow = '0 0 10px #f55';
+            } else if (type === 'water') {
+                projectile.style.backgroundColor = '#55f';
+                projectile.style.boxShadow = '0 0 10px #55f';
+            }
+            
+            dungeon.appendChild(projectile);
+            
+            // Animate
+            let pos = 0;
+            const anim = setInterval(() => {
+                pos += 5;
+                projectile.style.bottom = (10 + pos) + 'px';
+                
+                if (pos > 100) {
+                    clearInterval(anim);
+                    projectile.remove();
+                    
+                    // Create impact
+                    const impact = document.createElement('div');
+                    impact.className = 'impact';
+                    impact.style.position = 'absolute';
+                    impact.style.width = '40px';
+                    impact.style.height = '40px';
+                    impact.style.borderRadius = '50%';
+                    impact.style.top = '60px';
+                    impact.style.left = '50%';
+                    impact.style.transform = 'translate(-50%, -50%)';
+                    impact.style.backgroundColor = type === 'fire' ? 'rgba(255, 100, 100, 0.8)' : 'rgba(100, 100, 255, 0.8)';
+                    impact.style.animation = 'impact 0.3s forwards';
+                    
+                    dungeon.appendChild(impact);
+                    
+                    setTimeout(() => {
+                        impact.remove();
+                    }, 300);
+                }
+            }, 20);
+        }
+        
+        // Show floating text (for damage, healing etc.)
+        function showFloatingText(text, color) {
+            const dungeon = document.getElementById('dungeon-view');
+            const textElement = document.createElement('div');
+            textElement.className = 'floating-text';
+            textElement.textContent = text;
+            textElement.style.position = 'absolute';
+            textElement.style.color = color;
+            textElement.style.fontSize = '24px';
+            textElement.style.fontWeight = 'bold';
+            textElement.style.top = '100px';
+            textElement.style.left = '50%';
+            textElement.style.transform = 'translateX(-50%)';
+            textElement.style.textShadow = '2px 2px 2px black';
+            textElement.style.zIndex = '100';
+            
+            dungeon.appendChild(textElement);
+            
+            // Animate
+            let pos = 0;
+            const anim = setInterval(() => {
+                pos += 1;
+                textElement.style.top = (100 - pos) + 'px';
+                textElement.style.opacity = 1 - (pos / 50);
+                
+                if (pos > 50) {
+                    clearInterval(anim);
+                    textElement.remove();
+                }
+            }, 20);
+        }
+        
+        // Drop gems to fill gaps
+        function dropGems() {
+            // First, move existing gems down to fill gaps
+            for (let col = 0; col < GRID_SIZE; col++) {
+                // Count empty spaces from bottom to top
+                let emptySpaces = 0;
+                
+                for (let row = GRID_SIZE - 1; row >= 0; row--) {
+                    if (gameState.grid[row][col] === null) {
+                        emptySpaces++;
+                    } else if (emptySpaces > 0) {
+                        // Move gem down by the number of empty spaces
+                        gameState.grid[row + emptySpaces][col] = gameState.grid[row][col];
+                        gameState.grid[row][col] = null;
+                    }
+                }
+                
+                // Fill top rows with new random gems
+                for (let row = 0; row < emptySpaces; row++) {
+                    const randomIndex = Math.floor(Math.random() * GEM_TYPES.length);
+                    gameState.grid[row][col] = { ...GEM_TYPES[randomIndex] };
+                }
+            }
+            
+            // Update UI after dropping
+            updateGridUI();
+        }
+        
+        // Update the entire grid UI
+        function updateGridUI() {
+            const gemElements = document.querySelectorAll('.gem');
+            
+            for (let row = 0; row < GRID_SIZE; row++) {
+                for (let col = 0; col < GRID_SIZE; col++) {
+                    const index = row * GRID_SIZE + col;
+                    const gemElement = gemElements[index];
+                    const gem = gameState.grid[row][col];
+                    
+                    if (gem) {
+                        // Update class to match gem type
+                        gemElement.className = `gem ${gem.id}`;
+                        gemElement.dataset.row = row;
+                        gemElement.dataset.col = col;
+                    } else {
+                        // Empty cell (should not happen after filling)
+                        gemElement.className = 'gem empty';
+                    }
+                }
+            }
+        }
+        
+        // Enemy attack
+        function enemyAttack() {
+            if (gameState.enemies.length === 0) return;
+            
+            const enemy = gameState.enemies[0];
+            const damage = enemy.attack;
+            
+            // Apply damage to player
+            gameState.health = Math.max(0, gameState.health - damage);
+            
+            // Show damage
+            showFloatingText(`-${damage} HP`, '#f55');
+            
+            // Flash the enemy to show attack
+            const enemyElement = document.querySelector('.enemy');
+            if (enemyElement) {
+                enemyElement.style.animation = 'attack 0.5s';
+                setTimeout(() => {
+                    enemyElement.style.animation = 'float 2s infinite alternate ease-in-out';
+                }, 500);
+            }
+            
+            // Check if player is defeated
+            if (gameState.health <= 0) {
+                gameOver();
+            }
+            
+            // Update UI
+            updateUI();
+        }
+        
+        // Spawn a new enemy
+        function spawnEnemy() {
+            // Calculate enemy stats based on score
+            const level = Math.floor(gameState.score / 500) + 1;
+            const health = 80 + (level * 20);
+            const attack = 5 + Math.floor(level / 2);
+            
+            // Create new enemy
+            gameState.enemies = [{
+                name: `Enemy Lvl ${level}`,
+                health: health,
+                maxHealth: health,
+                attack: attack
+            }];
+            
+            // Update UI
+            updateUI();
+            
+            // Show new enemy with animation
+            const enemyElement = document.querySelector('.enemy');
+            if (enemyElement) {
+                enemyElement.style.opacity = '0';
+                enemyElement.style.transform = 'translateY(-50px)';
+                
+                setTimeout(() => {
+                    enemyElement.style.transition = 'opacity 0.5s, transform 0.5s';
+                    enemyElement.style.opacity = '1';
+                    enemyElement.style.transform = 'translateY(0)';
+                }, 100);
+            }
+        }
+        
+        // Game over
+        function gameOver() {
+            alert(`Game Over! Your final score: ${gameState.score}`);
+            startNewGame();
+        }
+        
+        // Start new game
+        function startNewGame() {
+            // Reset game state
+            gameState = {
+                grid: [],
+                heroes: [
+                    { name: 'Warrior', health: 100, attack: 10 },
+                    { name: 'Mage', health: 80, attack: 15 },
+                    { name: 'Healer', health: 70, attack: 5 }
+                ],
+                enemies: [],
+                health: 15705,
+                maxHealth: 15705,
+                score: 0,
+                selectedGem: null
+            };
+            
+            // Spawn initial enemy
+            spawnEnemy();
+            
+            // Initialize grid
+            initializeGrid();
+            
+            // Update UI
+            updateUI();
+        }
+        
+        // Update UI elements based on game state
+        function updateUI() {
+            // Update health bar
+            const healthPercentage = (gameState.health / gameState.maxHealth) * 100;
+            healthFill.style.width = `${healthPercentage}%`;
+            document.querySelector('#status-bar span:last-child').textContent = `${gameState.health}/${gameState.maxHealth}`;
+            
+            // Update enemy health 
+            if (gameState.enemies.length > 0) {
+                const enemy = gameState.enemies[0];
+                const enemyElement = document.querySelector('.enemy');
+                
+                if (enemyElement) {
+                    const healthBar = enemyElement.querySelector('.health-bar');
+                    if (!healthBar) {
+                        // Create health bar if it doesn't exist
+                        const newHealthBar = document.createElement('div');
+                        newHealthBar.className = 'health-bar';
+                        newHealthBar.style.width = '50px';
+                        newHealthBar.style.height = '5px';
+                        newHealthBar.style.backgroundColor = '#333';
+                        newHealthBar.style.position = 'absolute';
+                        newHealthBar.style.top = '-10px';
+                        newHealthBar.style.borderRadius = '2px';
+                        newHealthBar.style.overflow = 'hidden';
+                        
+                        const healthFill = document.createElement('div');
+                        healthFill.className = 'health-fill';
+                        healthFill.style.height = '100%';
+                        healthFill.style.backgroundColor = '#f55';
+                        healthFill.style.width = '100%';
+                        
+                        newHealthBar.appendChild(healthFill);
+                        enemyElement.appendChild(newHealthBar);
+                    } else {
+                        // Update existing health bar
+                        const healthFill = healthBar.querySelector('.health-fill');
+                        if (healthFill) {
+                            const enemyHealthPercentage = (enemy.health / enemy.maxHealth) * 100;
+                            healthFill.style.width = `${Math.max(0, enemyHealthPercentage)}%`;
+                        }
+                    }
+                }
+            }
+            
+            // Update hero stats
+            const heroCards = document.querySelectorAll('.hero-card');
+            gameState.heroes.forEach((hero, index) => {
+                if (index < heroCards.length) {
+                    const statsElement = heroCards[index].querySelector('.hero-stats');
+                    if (statsElement) {
+                        statsElement.textContent = `${hero.attack} ⚔️`;
+                    }
+                }
+            });
+        }
+        
+        // Add custom CSS for animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes impact {
+                0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+                100% { transform: translate(-50%, -50%) scale(3); opacity: 0; }
+            }
+            
+            @keyframes attack {
+                0% { transform: translateY(0); }
+                50% { transform: translateY(10px); }
+                100% { transform: translateY(0); }
+            }
+            
+            .gem.invalid {
+                animation: shake 0.3s;
+            }
+            
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                25% { transform: translateX(-5px); }
+                75% { transform: translateX(5px); }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Initialize game on load
+        window.addEventListener('load', () => {
+            startNewGame();
+        });
+    </script>
+</body>
+</html>
