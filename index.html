@@ -453,7 +453,7 @@
         
         <div id="start-overlay">
             <h1>Puzzle RPG</h1>
-            <button id="start-button">START GAME</button>
+            <button id="start-button" onclick="startGame()">START GAME</button>
         </div>
     </div>
 
@@ -502,10 +502,13 @@
         const startOverlay = document.getElementById('start-overlay');
         
         // Initialize the game when start button is clicked
-        startButton.addEventListener('click', () => {
+        function startGame() {
             startOverlay.style.display = 'none';
             startNewGame();
-        });
+        }
+        
+        // Add click event for start button
+        document.getElementById('start-button').addEventListener('click', startGame);
         
         // Initialize the grid
         function initializeGrid() {
