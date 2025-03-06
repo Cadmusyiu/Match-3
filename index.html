@@ -15,6 +15,19 @@
             user-select: none;
         }
         
+        /* Add styles for the real-time visual effect */
+        .gem {
+            transition: background-color 0.15s ease-in-out;
+        }
+        
+        .gem-icon {
+            transition: transform 0.1s ease-in-out;
+        }
+        
+        .gem.active .gem-icon {
+            transform: scale(1.1);
+        }
+        
         body {
             margin: 0;
             padding: 0;
@@ -613,6 +626,14 @@
             }
         }
         
+        // Sound effects
+        const sounds = {
+            select: new Audio('data:audio/wav;base64,UklGRiQEAABXQVZFZm10IBAAAAABAAEAESsAABErAAABAAgAZGF0YQAEAAAAAABVgKqA//+/gFVVQAAAQFVVv4D//wAAVYCqgP//v4BVVUAAAEBVVX+A//8AAHDMqoj//7+AMDBAAAAAQDA//4j//wAAAIAAgP//gIAAAAAAAAAAAAAAgP//AACAZY2H//+qgDVVQAAAQDVVqoD//wCGTi6ZiIiIiDg4ODg4ODg4OIiIiIgAhk4umYiIiIg4ODg4ODg4ODiIiIiIAAAAAAD/////AAAAAAAAAAAAAAAA//////8AAAAAAAAAAP//////////////////////////////////////////'),
+            match: new Audio('data:audio/wav;base64,UklGRoQDAABXQVZFZm10IBAAAAABAAEAESsAABErAAABAAgAZGF0YWAAAAAAAIB/f39/AACAgICAgP8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAf39/fwAAAAAAAAAAAACAgICAAICAgICAgP+Af39/f38AAACAgICAgP+Af39/f38AAICAgICAgIB/f39/f3+AgICAgICA/4B/f39/fwAAAICAgICA/4B/f39/fwAAgICAgICAgH9/f39/f4CAgICAgID/AH9/f39/f4CAgICAgIAAgH9/f39/AACAgICAgP8Af39/f39/gICAgICAgACAf39/f38AAACAgICA/wB/f39/f3+AgICAgICAAIB/f39/fwAAAICAgID/gH9/f39/f4CAgICAgIAAgH9/f39/AACAgICAgP+Af39/f39/gICAgICAgACAf39/f38AAICAgICA/wBqqmpmZmaAgICAgICA/wB/f39/f3+AgICAgICAAIB/f39/fwAAgICAgID/AH9/f39/f4CAgICAgIAAgH9/f39/AACAgICAgP8Af39/f39/gICAgICAgACAf39/f38AAICAgICA/wB/f39/f3+AgICAgICAAIB/f39/fwAAgICAgICAgH9/f39/f4CAgICAgIAAgH9/f39/AACAgICAgP+Af39/f39/gICAgICAgACAf39/f38AAICAgICA/4B/f39/f3+AgICAgICAAIB/f39/fwAAAICAgID/gH9/f39/f4CAgICAgIAAgH9/f39/AACAgICAgP8Af39/f39/gICAgICAgACAf39/f38AAICAgICA/wB/f39/f3+AgICAgICAAIA='),
+            combo: new Audio('data:audio/wav;base64,UklGRhQCAABXQVZFZm10IBAAAAABAAEAESsAABErAAABAAgAZGF0YfABAAAAAAAAVYCqgP//v4BVVUAAAEBVVX+AAAAAAABwzKqI//+/gDAwQAAAAEAwf/8AAAAAAACAgICA//+/gICAAAAAAAAA/wAAAAAAAICAAAD//4CAAP8AAAAAAAD/AAAAP39/fwAAAAAAAAAAAICAgIAAQEB/f38AAAAAAAAAAAD//wAAAP8AAAAAAEB/f3+Af39/f38AAABAQED/AAAAAAB/f39/AP9/f39/f39/f39/f39/f4CAgICA/wAAAH9/f39/f3+AgICAgICAgICAgICA/wAAAH9/f39/f3+AgICAgICAgICAgID/AAAAAAAAAAB/f39/f3+AgICAgIAAAICAgP8AAAAAAAAAAAAAAH9/f39/AAAAAICAgIAAAAAAAAAAAAAAAAAAgICAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAgICAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=='),
+            swap: new Audio('data:audio/wav;base64,UklGRiwCAABXQVZFZm10IBAAAAABAAEAESsAABErAAABAAgAZGF0YQgCAAD//wCAQEBAQACAf3//////////fwB/QEB/fwAAAP//AEB/AAAAAAAAQEAAAEBAAAAAAAAAAAAAAAAAgH9//////////3//f0BAf38AAAD//wBAf39AQEBAAAAAAAAAAAAAAAAAAAAAAAD/fwB/QEAAQACAf3//////////fwB/QEB/fwAAAP//AEB/QEAAAABAQABAAAAAAAAAAAAAAAAAAAAAAAD/fwB/QEAAQACAf39/f39/f39/f39/QEAAAAAAAP//AEAAAABAQEAAgH9/f39/f39/fwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==')
+        };
+        
         // Start a new path from a gem
         function startPath(row, col) {
             // Reset current path
@@ -622,9 +643,17 @@
             // Add the first gem to the path
             gameState.currentPath.push({ row, col });
             
+            // Store the starting gem type for real-time visualization
+            gameState.startingGem = { ...gameState.grid[row][col] };
+            gameState.startingGemPosition = { row, col };
+            
             // Mark the gem as active
             const gemElement = gameState.gemElements[row][col];
             gemElement.classList.add('active');
+            
+            // Play select sound
+            sounds.select.currentTime = 0;
+            sounds.select.play();
             
             // Start the timer
             startPathTimer();
@@ -669,6 +698,19 @@
                     if (lines.length > 0) {
                         lines[lines.length - 1].remove();
                     }
+                    
+                    // Remove the last dot
+                    const dots = document.querySelectorAll('.path-dot');
+                    if (dots.length > 0) {
+                        dots[dots.length - 1].remove();
+                    }
+                    
+                    // Update real-time gem visualization
+                    updateRealTimeGems();
+                    
+                    // Play swap sound
+                    sounds.swap.currentTime = 0;
+                    sounds.swap.play();
                 }
                 
                 return;
@@ -692,6 +734,66 @@
             dot.style.left = (rect.left + rect.width/2 - gridRect.left - 7) + 'px';
             dot.style.top = (rect.top + rect.height/2 - gridRect.top - 7) + 'px';
             gridContainer.appendChild(dot);
+            
+            // Update real-time gem visualization
+            updateRealTimeGems();
+            
+            // Play swap sound
+            sounds.swap.currentTime = 0;
+            sounds.swap.play();
+        }
+        
+        // Update gem positions in real-time as user drags
+        function updateRealTimeGems() {
+            // Create a temporary copy of the original grid
+            const originalGrid = [];
+            for (let row = 0; row < GRID_SIZE; row++) {
+                originalGrid[row] = [];
+                for (let col = 0; col < GRID_SIZE; col++) {
+                    originalGrid[row][col] = { ...gameState.grid[row][col] };
+                }
+            }
+            
+            // Apply the path movement in the temporary grid
+            if (gameState.currentPath.length > 1) {
+                const startingGem = gameState.startingGem;
+                const startPos = gameState.startingGemPosition;
+                const endPos = gameState.currentPath[gameState.currentPath.length - 1];
+                
+                // Move gems along path
+                for (let i = 0; i < gameState.currentPath.length - 1; i++) {
+                    const current = gameState.currentPath[i];
+                    const next = gameState.currentPath[i + 1];
+                    
+                    originalGrid[current.row][current.col] = { ...originalGrid[next.row][next.col] };
+                }
+                
+                // Place starting gem at end of path
+                originalGrid[endPos.row][endPos.col] = startingGem;
+                
+                // Update the UI based on the temporary grid
+                for (let row = 0; row < GRID_SIZE; row++) {
+                    for (let col = 0; col < GRID_SIZE; col++) {
+                        const gemElement = gameState.gemElements[row][col];
+                        const gem = originalGrid[row][col];
+                        
+                        // Only update the visual appearance, not the actual game state
+                        if (gem) {
+                            // Update class to match gem type
+                            gemElement.className = `gem ${gem.id}`;
+                            if (gameState.currentPath.some(p => p.row === row && p.col === col)) {
+                                gemElement.classList.add('active');
+                            }
+                            
+                            // Update icon
+                            while (gemElement.firstChild) {
+                                gemElement.removeChild(gemElement.firstChild);
+                            }
+                            gemElement.appendChild(createGemIcon(gem.id));
+                        }
+                    }
+                }
+            }
         }
         
         // Draw a line between two gems
@@ -773,12 +875,15 @@
                 return;
             }
             
+            // We've already been updating the visuals in real time,
+            // now we need to actually update the game state
+            
             // Process the path - swap gems along the path
             const startGem = gameState.currentPath[0];
             const endGem = gameState.currentPath[gameState.currentPath.length - 1];
             
             // Get the gem types
-            const startGemType = gameState.grid[startGem.row][startGem.col];
+            const startGemType = gameState.startingGem;
             
             // Move the start gem along the path
             for (let i = 0; i < gameState.currentPath.length - 1; i++) {
@@ -795,7 +900,7 @@
             // Remove path visuals
             clearPathVisuals();
             
-            // Update the UI
+            // Update the UI (should be minimal since we've been updating in real-time)
             updateGridUI();
             
             // Check for matches
@@ -803,6 +908,10 @@
             if (matches.length > 0) {
                 // Found matches - process them
                 setTimeout(() => {
+                    // Play match sound
+                    sounds.match.currentTime = 0;
+                    sounds.match.play();
+                    
                     resolveMatches(matches);
                 }, 300);
             } else {
@@ -984,6 +1093,10 @@
             
             // Show combo text if multiple matches
             if (matches.length > 1) {
+                // Play combo sound
+                sounds.combo.currentTime = 0;
+                sounds.combo.play();
+                
                 comboText.textContent = `COMBO x${matches.length}!`;
                 comboText.style.animation = 'combo-popup 1.5s forwards';
                 setTimeout(() => {
