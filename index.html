@@ -452,23 +452,26 @@
         <div id="combo-text">COMBO x3!</div>
         
         <div id="start-overlay">
-            <h1>Puzzle RPG</h1>
-            <button id="start-button" onclick="startGame()">START GAME</button>
+            <h1 style="color: white; margin-bottom: 20px; font-size: 36px;">Puzzle RPG</h1>
+            <!-- We'll replace this button with JavaScript -->
+            <button id="start-button" style="padding: 15px 30px; font-size: 24px; background-color: #4caf50; color: white; border: none; border-radius: 10px; cursor: pointer;">START GAME</button>
         </div>
     </div>
 
     <script>
-        // Constants
-        const GRID_SIZE = 6;
-        const GEM_TYPES = [
-            { id: 'water', icon: '💧', color: '#42a5f5' },
-            { id: 'fire', icon: '🔥', color: '#ff7043' },
-            { id: 'heart', icon: '❤️', color: '#ec407a' },
-            { id: 'leaf', icon: '🍃', color: '#66bb6a' },
-            { id: 'star', icon: '⭐', color: '#ffca28' },
-            { id: 'moon', icon: '🌙', color: '#9575cd' }
-        ];
-        const PATH_MOVE_TIME = 5; // seconds
+        // Wait for DOM to be fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Constants
+            const GRID_SIZE = 6;
+            const GEM_TYPES = [
+                { id: 'water', icon: '💧', color: '#42a5f5' },
+                { id: 'fire', icon: '🔥', color: '#ff7043' },
+                { id: 'heart', icon: '❤️', color: '#ec407a' },
+                { id: 'leaf', icon: '🍃', color: '#66bb6a' },
+                { id: 'star', icon: '⭐', color: '#ffca28' },
+                { id: 'moon', icon: '🌙', color: '#9575cd' }
+            ];
+            const PATH_MOVE_TIME = 5; // seconds
         
         // Game state
         let gameState = {
@@ -491,24 +494,46 @@
             gemElements: [] // Store references to gem DOM elements
         };
         
-        // DOM elements
-        const gridContainer = document.getElementById('grid-container');
-        const healthFill = document.getElementById('health-fill');
-        const healthText = document.getElementById('health-text');
-        const timerContainer = document.getElementById('timer-container');
-        const timerCircle = document.getElementById('timer-circle');
-        const comboText = document.getElementById('combo-text');
-        const startButton = document.getElementById('start-button');
-        const startOverlay = document.getElementById('start-overlay');
-        
-        // Initialize the game when start button is clicked
-        function startGame() {
-            startOverlay.style.display = 'none';
-            startNewGame();
-        }
-        
-        // Add click event for start button
-        document.getElementById('start-button').addEventListener('click', startGame);
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize game elements
+            const gridContainer = document.getElementById('grid-container');
+            const healthFill = document.getElementById('health-fill');
+            const healthText = document.getElementById('health-text');
+            const timerContainer = document.getElementById('timer-container');
+            const timerCircle = document.getElementById('timer-circle');
+            const comboText = document.getElementById('combo-text');
+            const startButton = document.getElementById('start-button');
+            const startOverlay = document.getElementById('start-overlay');
+            
+            // Create a completely new button programmatically
+            const newStartButton = document.createElement('button');
+            newStartButton.textContent = 'START GAME';
+            newStartButton.style.padding = '15px 30px';
+            newStartButton.style.fontSize = '24px';
+            newStartButton.style.backgroundColor = '#4caf50';
+            newStartButton.style.color = 'white';
+            newStartButton.style.border = 'none';
+            newStartButton.style.borderRadius = '10px';
+            newStartButton.style.cursor = 'pointer';
+            newStartButton.style.marginTop = '20px';
+            
+            // Replace the existing button
+            if (startButton && startButton.parentNode) {
+                startButton.parentNode.replaceChild(newStartButton, startButton);
+            } else {
+                // If somehow the original button is not found, add the new one to the overlay
+                startOverlay.appendChild(newStartButton);
+            }
+            
+            // Add click event directly
+            newStartButton.addEventListener('click', function(e) {
+                console.log('New start button clicked');
+                e.preventDefault();
+                e.stopPropagation();
+                startOverlay.style.display = 'none';
+                startNewGame();
+            });
+            
         
         // Initialize the grid
         function initializeGrid() {
