@@ -9,75 +9,18 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            touch-action: manipulation;
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            user-select: none;
-        }
-        
-        /* Add styles for the real-time visual effect */
-        .gem {
-            transition: background-color 0.15s ease-in-out;
-        }
-        
-        .gem-icon {
-            transition: transform 0.1s ease-in-out;
-        }
-        
-        .gem.active .gem-icon {
-            transform: scale(1.1);
-        }
-        
-        /* Animation for matched gems */
-        .gem.matched {
-            animation: matched-pulse 0.5s infinite alternate;
-        }
-        
-        @keyframes matched-pulse {
-            0% { transform: scale(1); opacity: 1; }
-            100% { transform: scale(1.1); opacity: 0.8; }
-        }
-        
-        @keyframes pulsate {
-            0% { transform: scale(1); }
-            100% { transform: scale(1.2); }
-        }
-        
-        @keyframes sparkle {
-            0% { transform: scale(1); opacity: 0.5; }
-            100% { transform: scale(1.5); opacity: 1; }
-        }
-        
-        /* Sparkles container for matched gems */
-        .sparkle-container {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 20;
-        }
-        
-        /* Timer pulse animation */
-        #timer-circle {
-            animation: timer-pulse 1s infinite alternate;
-        }
-        
-        @keyframes timer-pulse {
-            0% { transform: scale(1); }
-            100% { transform: scale(1.05); }
         }
         
         body {
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
             background-color: #1a1a1a;
             color: white;
+            font-family: Arial, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             overflow: hidden;
+            touch-action: manipulation;
         }
         
         #game-container {
@@ -95,68 +38,17 @@
             height: 120px;
             background-color: #333;
             position: relative;
-            overflow: hidden;
             display: flex;
             justify-content: center;
             align-items: center;
         }
         
-        #enemy-container {
-            position: relative;
-            width: 100px;
-            height: 100px;
-        }
-        
         .enemy {
-            position: absolute;
             width: 60px;
             height: 60px;
             background-color: #e57373;
             border-radius: 10px;
-            top: 20px;
-            left: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        .enemy-eyes {
-            position: absolute;
-            width: 10px;
-            height: 10px;
-            background-color: white;
-            border-radius: 50%;
-            top: 15px;
-            left: 15px;
-            box-shadow: 20px 0 0 white;
-        }
-        
-        .enemy-mouth {
-            position: absolute;
-            width: 20px;
-            height: 5px;
-            background-color: #333;
-            top: 35px;
-            left: 20px;
-        }
-        
-        .flame {
-            position: absolute;
-            width: 30px;
-            height: 45px;
-            background: radial-gradient(ellipse at bottom, #ffb800 0%, #ff8000 50%, transparent 100%);
-            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
-            animation: flicker 0.5s infinite alternate ease-in-out;
-        }
-        
-        .flame-left {
-            top: 30px;
-            left: -50px;
-        }
-        
-        .flame-right {
-            top: 30px;
-            right: -50px;
+            position: relative;
         }
         
         #heroes-area {
@@ -207,31 +99,19 @@
             height: 30px;
         }
         
-        #health-bar-container {
-            display: flex;
-            flex-grow: 1;
-            height: 20px;
-            align-items: center;
-            margin-left: 10px;
-        }
-        
         #health-bar {
             height: 16px;
             background-color: #444;
             border-radius: 8px;
             overflow: hidden;
             flex-grow: 1;
+            margin: 0 10px;
         }
         
         #health-fill {
             height: 100%;
             background-color: #f25;
             width: 100%;
-        }
-        
-        #health-text {
-            margin-left: 10px;
-            font-size: 14px;
         }
         
         #grid-container {
@@ -243,7 +123,6 @@
             padding: 2px;
             background-color: #111;
             position: relative;
-            touch-action: none;
         }
         
         .gem {
@@ -251,66 +130,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            position: relative;
-            transition: transform 0.2s;
-        }
-        
-        .gem-icon {
-            width: 70%;
-            height: 70%;
-            pointer-events: none;
-        }
-        
-        .gem.active {
-            z-index: 10;
-            transform: scale(1.1);
-            box-shadow: 0 0 10px white;
-        }
-        
-        .gem.matched {
-            animation: pulse 0.5s infinite alternate;
-        }
-        
-        .path-line {
-            position: absolute;
-            background-color: rgba(255, 255, 255, 0.6);
-            pointer-events: none;
-            z-index: 5;
-        }
-        
-        .path-dot {
-            position: absolute;
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            background-color: rgba(255, 255, 255, 0.8);
-            pointer-events: none;
-            z-index: 5;
-        }
-        
-        #timer-container {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            width: 50px;
-            height: 50px;
-            z-index: 20;
-            display: none;
-        }
-        
-        #timer-circle {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            background: conic-gradient(#ffb703 0%, transparent 0%);
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
             font-size: 24px;
-            font-weight: bold;
-            color: white;
-            text-shadow: 0 1px 2px black;
         }
         
         .water { background-color: #42a5f5; }
@@ -320,62 +140,14 @@
         .star { background-color: #ffca28; }
         .moon { background-color: #9575cd; }
         
-        .highlight-match {
-            position: absolute;
-            border: 2px solid rgba(255, 255, 255, 0.8);
-            border-radius: 5px;
-            z-index: 15;
-            pointer-events: none;
-            animation: highlight-pulse 1s infinite alternate;
-        }
-        
-        #combo-text {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 40px;
-            font-weight: bold;
-            color: white;
-            text-shadow: 0 0 10px #f00, 0 0 20px #ff0;
-            opacity: 0;
-            z-index: 30;
-            pointer-events: none;
-        }
-        
-        @keyframes combo-popup {
-            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
-            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
-            100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
-        }
-        
-        @keyframes float {
-            0% { transform: translateY(0); }
-            100% { transform: translateY(-5px); }
-        }
-        
-        @keyframes flicker {
-            0% { transform: scale(1); opacity: 0.8; }
-            100% { transform: scale(1.1); opacity: 1; }
-        }
-        
-        @keyframes pulse {
-            0% { opacity: 1; }
-            100% { opacity: 0.5; }
-        }
-        
-        @keyframes highlight-pulse {
-            0% { box-shadow: 0 0 5px rgba(255, 255, 255, 0.5); }
-            100% { box-shadow: 0 0 15px rgba(255, 255, 255, 0.8); }
-        }
-        
+        /* Start overlay with game title and start button */
         #start-overlay {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
+            background-color: rgba(0, 0, 0, 0.9);
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -383,39 +155,36 @@
             z-index: 100;
         }
         
-        #start-button {
-            padding: 15px 30px;
+        .start-title {
+            font-size: 36px;
+            margin-bottom: 30px;
+            color: white;
+            text-align: center;
+        }
+        
+        .start-button {
+            padding: 15px 40px;
             font-size: 24px;
             background-color: #4caf50;
             color: white;
             border: none;
             border-radius: 10px;
             cursor: pointer;
-            margin-top: 20px;
         }
         
-        .floating-text {
-            position: absolute;
-            font-weight: bold;
-            text-shadow: 1px 1px 2px black;
-            pointer-events: none;
-            z-index: 20;
+        .start-button:hover {
+            background-color: #3e8e41;
         }
     </style>
 </head>
 <body>
     <div id="game-container">
+        <!-- Dungeon view with enemy -->
         <div id="dungeon-view">
-            <div id="enemy-container">
-                <div class="enemy">
-                    <div class="enemy-eyes"></div>
-                    <div class="enemy-mouth"></div>
-                </div>
-            </div>
-            <div class="flame flame-left"></div>
-            <div class="flame flame-right"></div>
+            <div class="enemy"></div>
         </div>
         
+        <!-- Hero cards area -->
         <div id="heroes-area">
             <div class="hero-card">
                 <div class="hero-icon" style="background-color: #ab47bc;">⚔️</div>
@@ -431,1321 +200,92 @@
             </div>
         </div>
         
+        <!-- Health bar -->
         <div id="status-bar">
             <span>HP:</span>
-            <div id="health-bar-container">
-                <div id="health-bar">
-                    <div id="health-fill"></div>
-                </div>
-                <span id="health-text">15700/15705</span>
+            <div id="health-bar">
+                <div id="health-fill"></div>
             </div>
+            <span>15700/15705</span>
         </div>
         
-        <div id="grid-container">
-            <!-- Grid will be filled by JavaScript -->
-        </div>
+        <!-- Game grid -->
+        <div id="grid-container"></div>
         
-        <div id="timer-container">
-            <div id="timer-circle">5</div>
-        </div>
-        
-        <div id="combo-text">COMBO x3!</div>
-        
+        <!-- Start overlay -->
         <div id="start-overlay">
-            <h1 style="color: white; margin-bottom: 20px; font-size: 36px;">Puzzle RPG</h1>
-            <!-- We'll replace this button with JavaScript -->
-            <button id="start-button" style="padding: 15px 30px; font-size: 24px; background-color: #4caf50; color: white; border: none; border-radius: 10px; cursor: pointer;">START GAME</button>
+            <h1 class="start-title">Puzzle RPG</h1>
+            <button class="start-button" id="start-game-btn">START GAME</button>
         </div>
     </div>
 
     <script>
-        // Wait for DOM to be fully loaded
-        document.addEventListener('DOMContentLoaded', function() {
-            // Constants
-            const GRID_SIZE = 6;
-            const GEM_TYPES = [
-                { id: 'water', icon: '💧', color: '#42a5f5' },
-                { id: 'fire', icon: '🔥', color: '#ff7043' },
-                { id: 'heart', icon: '❤️', color: '#ec407a' },
-                { id: 'leaf', icon: '🍃', color: '#66bb6a' },
-                { id: 'star', icon: '⭐', color: '#ffca28' },
-                { id: 'moon', icon: '🌙', color: '#9575cd' }
-            ];
-            const PATH_MOVE_TIME = 5; // seconds
-        
-        // Game state
-        let gameState = {
-            grid: [],
-            heroes: [
-                { name: 'Warrior', health: 100, attack: 11 },
-                { name: 'Mage', health: 80, attack: 16 },
-                { name: 'Healer', health: 70, attack: 8 }
-            ],
-            enemies: [
-                { name: 'Enemy', health: 100, maxHealth: 100, attack: 10 }
-            ],
-            health: 15700,
-            maxHealth: 15705,
-            score: 0,
-            pathMode: false,
-            pathTimer: null,
-            pathTimeLeft: PATH_MOVE_TIME,
-            currentPath: [],
-            gemElements: [] // Store references to gem DOM elements
-        };
-        
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initialize game elements
-            const gridContainer = document.getElementById('grid-container');
-            const healthFill = document.getElementById('health-fill');
-            const healthText = document.getElementById('health-text');
-            const timerContainer = document.getElementById('timer-container');
-            const timerCircle = document.getElementById('timer-circle');
-            const comboText = document.getElementById('combo-text');
-            const startButton = document.getElementById('start-button');
+        // Wait for page to fully load
+        window.onload = function() {
+            // Get DOM elements
             const startOverlay = document.getElementById('start-overlay');
-            
-            // Create a completely new button programmatically
-            const newStartButton = document.createElement('button');
-            newStartButton.textContent = 'START GAME';
-            newStartButton.style.padding = '15px 30px';
-            newStartButton.style.fontSize = '24px';
-            newStartButton.style.backgroundColor = '#4caf50';
-            newStartButton.style.color = 'white';
-            newStartButton.style.border = 'none';
-            newStartButton.style.borderRadius = '10px';
-            newStartButton.style.cursor = 'pointer';
-            newStartButton.style.marginTop = '20px';
-            
-            // Replace the existing button
-            if (startButton && startButton.parentNode) {
-                startButton.parentNode.replaceChild(newStartButton, startButton);
-            } else {
-                // If somehow the original button is not found, add the new one to the overlay
-                startOverlay.appendChild(newStartButton);
-            }
-            
-            // Add click event directly
-            newStartButton.addEventListener('click', function(e) {
-                console.log('New start button clicked');
-                e.preventDefault();
-                e.stopPropagation();
-                startOverlay.style.display = 'none';
-                startNewGame();
-            });
-            
-        
-        // Initialize the grid
-        function initializeGrid() {
-            // Clear grid container
-            gridContainer.innerHTML = '';
-            gameState.gemElements = [];
-            
-            // Create empty grid in game state
-            gameState.grid = [];
-            for (let row = 0; row < GRID_SIZE; row++) {
-                gameState.grid[row] = [];
-                gameState.gemElements[row] = [];
-                
-                for (let col = 0; col < GRID_SIZE; col++) {
-                    // Create a random gem
-                    const randomIndex = Math.floor(Math.random() * GEM_TYPES.length);
-                    const gemType = GEM_TYPES[randomIndex];
-                    gameState.grid[row][col] = { ...gemType };
-                    
-                    // Create DOM element for the gem
-                    const gemElement = document.createElement('div');
-                    gemElement.className = `gem ${gemType.id}`;
-                    gemElement.dataset.row = row;
-                    gemElement.dataset.col = col;
-                    
-                    // Create SVG icon based on gem type
-                    const iconElement = createGemIcon(gemType.id);
-                    gemElement.appendChild(iconElement);
-                    
-                    // Add to grid and store reference
-                    gridContainer.appendChild(gemElement);
-                    gameState.gemElements[row][col] = gemElement;
-                }
-            }
-            
-            // Add touch/mouse event listeners to the grid
-            setupPathEvents();
-            
-            // Check for any initial matches and resolve them
-            const initialMatches = checkMatches();
-            if (initialMatches.length > 0) {
-                resolveMatches(initialMatches);
-            }
-            
-            updateUI();
-        }
-        
-        // Create SVG icon for gem
-        function createGemIcon(type) {
-            const svgNS = "http://www.w3.org/2000/svg";
-            const svg = document.createElementNS(svgNS, "svg");
-            svg.setAttribute("viewBox", "0 0 24 24");
-            svg.setAttribute("class", "gem-icon");
-            
-            let path = document.createElementNS(svgNS, "path");
-            path.setAttribute("fill", "white");
-            
-            switch(type) {
-                case 'water':
-                    path.setAttribute("d", "M12 2c-5.33 4.55-8 8.48-8 11.8 0 4.98 3.8 8.2 8 8.2s8-3.22 8-8.2c0-3.32-2.67-7.25-8-11.8z");
-                    break;
-                case 'fire':
-                    path.setAttribute("d", "M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67z");
-                    break;
-                case 'heart':
-                    path.setAttribute("d", "M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z");
-                    break;
-                case 'leaf':
-                    path.setAttribute("d", "M6.05 8.05c-2.73 2.73-2.73 7.15-.02 9.88 1.47-3.4 4.09-6.24 7.36-7.93-2.77 2.34-4.71 5.61-5.39 9.32C9.7 21.68 12.22 22.9 15 22.9c3.87 0 7-3.13 7-7 0-6.93-3.44-9.93-8.57-12.21-2.36 1.29-4.38 3.3-5.67 6.36-1.13-2.54-1.35-5.46-.71-8.45-.9 1.13-1.97 2.39-3 3.45z");
-                    break;
-                case 'star':
-                    path.setAttribute("d", "M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z");
-                    break;
-                case 'moon':
-                    path.setAttribute("d", "M12 2.68l-1.9 4.32-4.84.42 3.67 3.18-1.09 4.7L12 12.44l4.16 2.86-1.09-4.7 3.67-3.18-4.84-.42z");
-                    break;
-            }
-            
-            svg.appendChild(path);
-            return svg;
-        }
-        
-        // Setup touch and mouse events for path drawing
-        function setupPathEvents() {
-            let isDragging = false;
-            
-            // Handle touch events
-            gridContainer.addEventListener('touchstart', handlePathStart, { passive: false });
-            gridContainer.addEventListener('touchmove', handlePathMove, { passive: false });
-            gridContainer.addEventListener('touchend', handlePathEnd);
-            
-            // Handle mouse events (for testing on desktop)
-            gridContainer.addEventListener('mousedown', handlePathStart);
-            gridContainer.addEventListener('mousemove', handlePathMove);
-            gridContainer.addEventListener('mouseup', handlePathEnd);
-            gridContainer.addEventListener('mouseleave', handlePathEnd);
-            
-            function handlePathStart(e) {
-                e.preventDefault();
-                
-                // Get the touched/clicked element
-                const element = getTouchedElement(e);
-                if (!element || !element.classList.contains('gem')) return;
-                
-                // Start path mode
-                gameState.pathMode = true;
-                isDragging = true;
-                
-                // Get gem coordinates
-                const row = parseInt(element.dataset.row);
-                const col = parseInt(element.dataset.col);
-                
-                // Start the path
-                startPath(row, col);
-            }
-            
-            function handlePathMove(e) {
-                e.preventDefault();
-                
-                if (!isDragging || !gameState.pathMode) return;
-                
-                // Get the touched/hovered element
-                const element = getTouchedElement(e);
-                if (!element || !element.classList.contains('gem')) return;
-                
-                // Get gem coordinates
-                const row = parseInt(element.dataset.row);
-                const col = parseInt(element.dataset.col);
-                
-                // Try to add to path
-                addToPath(row, col);
-            }
-            
-            function handlePathEnd(e) {
-                if (isDragging && gameState.pathMode) {
-                    e.preventDefault();
-                    finishPath();
-                }
-                isDragging = false;
-            }
-            
-            function getTouchedElement(e) {
-                // Get touch or mouse position
-                let clientX, clientY;
-                
-                if (e.type.startsWith('touch')) {
-                    if (e.touches.length === 0) return null;
-                    clientX = e.touches[0].clientX;
-                    clientY = e.touches[0].clientY;
-                } else {
-                    clientX = e.clientX;
-                    clientY = e.clientY;
-                }
-                
-                // Get element at that position
-                return document.elementFromPoint(clientX, clientY);
-            }
-        }
-        
-        // Sound effects
-        const sounds = {
-            select: new Audio('data:audio/wav;base64,UklGRiQEAABXQVZFZm10IBAAAAABAAEAESsAABErAAABAAgAZGF0YQAEAAAAAABVgKqA//+/gFVVQAAAQFVVv4D//wAAVYCqgP//v4BVVUAAAEBVVX+A//8AAHDMqoj//7+AMDBAAAAAQDA//4j//wAAAIAAgP//gIAAAAAAAAAAAAAAgP//AACAZY2H//+qgDVVQAAAQDVVqoD//wCGTi6ZiIiIiDg4ODg4ODg4OIiIiIgAhk4umYiIiIg4ODg4ODg4ODiIiIiIAAAAAAD/////AAAAAAAAAAAAAAAA//////8AAAAAAAAAAP//////////////////////////////////////////'),
-            match: new Audio('data:audio/wav;base64,UklGRoQDAABXQVZFZm10IBAAAAABAAEAESsAABErAAABAAgAZGF0YWAAAAAAAIB/f39/AACAgICAgP8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAf39/fwAAAAAAAAAAAACAgICAAICAgICAgP+Af39/f38AAACAgICAgP+Af39/f38AAICAgICAgIB/f39/f3+AgICAgICA/4B/f39/fwAAAICAgICA/4B/f39/fwAAgICAgICAgH9/f39/f4CAgICAgID/AH9/f39/f4CAgICAgIAAgH9/f39/AACAgICAgP8Af39/f39/gICAgICAgACAf39/f38AAACAgICA/wB/f39/f3+AgICAgICAAIB/f39/fwAAAICAgID/gH9/f39/f4CAgICAgIAAgH9/f39/AACAgICAgP+Af39/f39/gICAgICAgACAf39/f38AAICAgICA/wBqqmpmZmaAgICAgICA/wB/f39/f3+AgICAgICAAIB/f39/fwAAgICAgID/AH9/f39/f4CAgICAgIAAgH9/f39/AACAgICAgP8Af39/f39/gICAgICAgACAf39/f38AAICAgICA/wB/f39/f3+AgICAgICAAIB/f39/fwAAgICAgICAgH9/f39/f4CAgICAgIAAgH9/f39/AACAgICAgP+Af39/f39/gICAgICAgACAf39/f38AAICAgICA/4B/f39/f3+AgICAgICAAIB/f39/fwAAAICAgID/gH9/f39/f4CAgICAgIAAgH9/f39/AACAgICAgP8Af39/f39/gICAgICAgACAf39/f38AAICAgICA/wB/f39/f3+AgICAgICAAIA='),
-            combo: new Audio('data:audio/wav;base64,UklGRhQCAABXQVZFZm10IBAAAAABAAEAESsAABErAAABAAgAZGF0YfABAAAAAAAAVYCqgP//v4BVVUAAAEBVVX+AAAAAAABwzKqI//+/gDAwQAAAAEAwf/8AAAAAAACAgICA//+/gICAAAAAAAAA/wAAAAAAAICAAAD//4CAAP8AAAAAAAD/AAAAP39/fwAAAAAAAAAAAICAgIAAQEB/f38AAAAAAAAAAAD//wAAAP8AAAAAAEB/f3+Af39/f38AAABAQED/AAAAAAB/f39/AP9/f39/f39/f39/f39/f4CAgICA/wAAAH9/f39/f3+AgICAgICAgICAgICA/wAAAH9/f39/f3+AgICAgICAgICAgID/AAAAAAAAAAB/f39/f3+AgICAgIAAAICAgP8AAAAAAAAAAAAAAH9/f39/AAAAAICAgIAAAAAAAAAAAAAAAAAAgICAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAgICAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=='),
-            swap: new Audio('data:audio/wav;base64,UklGRiwCAABXQVZFZm10IBAAAAABAAEAESsAABErAAABAAgAZGF0YQgCAAD//wCAQEBAQACAf3//////////fwB/QEB/fwAAAP//AEB/AAAAAAAAQEAAAEBAAAAAAAAAAAAAAAAAgH9//////////3//f0BAf38AAAD//wBAf39AQEBAAAAAAAAAAAAAAAAAAAAAAAD/fwB/QEAAQACAf3//////////fwB/QEB/fwAAAP//AEB/QEAAAABAQABAAAAAAAAAAAAAAAAAAAAAAAD/fwB/QEAAQACAf39/f39/f39/f39/QEAAAAAAAP//AEAAAABAQEAAgH9/f39/f39/fwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=='),
-            timer: new Audio('data:audio/wav;base64,UklGRqwCAABXQVZFZm10IBAAAAABAAEARKwAAESsAAABAAgAZGF0YYgCAAAAAAAA//8AAAAA/////wAAAP8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD//////wAAAAAAAAAA/////wAAAAD///////8AAAAA//8AAAAA/////wAAAAD/////AAAAAAAAAAAAAAAAAAAAAAAAAAD/////AAAAAAAAAAD/////AAAAAP///////wAAAAD//wAAAAD/////AAAAAP////8AAAAA//////8AAAAA/////wAAAAD/////AAAAAAAAAAAAAAAAAAAAAAAAAAD/////AAAAAAAAAAD/////AAAAAP///////wAAAAD//wAAAAD/////AAAAAP////8AAAAA//////8AAAAA/////wAAAAD/////AAAAAP////8AAAAAAAAAAP////8AAAAA/////wAAAP8AAAAA/////wAAAAD/////AAAAAP//AAAAAAAAAAD/////AAAAAAAAAAD//wAAAAAAAAAA/////wAAAAD//////wAAAAAAAAAA/////wAAAAD/////AAAAAP////8AAAAAAAAAAP////8AAAAA//////8AAAAAAAAAAP////8AAAAA//////8AAAAAAAAAAP////8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP//AAAAAAAAAAAAAAAA//8AAAAA//8AAAAAAAAAAP//AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/////AAAAAAAAAAD/////AAAAAP///////wAAAAD//wAAAAD/////AAAAAP////8AAAAA')
-        };
-        };
-        
-        // Start a new path from a gem
-        function startPath(row, col) {
-            // Reset current path
-            gameState.currentPath = [];
-            clearPathVisuals();
-            
-            // Add the first gem to the path
-            gameState.currentPath.push({ row, col });
-            
-            // Store the starting gem type for real-time visualization
-            gameState.startingGem = { ...gameState.grid[row][col] };
-            gameState.startingGemPosition = { row, col };
-            
-            // Mark the gem as active
-            const gemElement = gameState.gemElements[row][col];
-            gemElement.classList.add('active');
-            
-            // Play select sound
-            sounds.select.currentTime = 0;
-            sounds.select.play();
-            
-            // Start the timer
-            startPathTimer();
-            
-            // Show a dot at the start
-            const dot = document.createElement('div');
-            dot.className = 'path-dot';
-            const rect = gemElement.getBoundingClientRect();
-            const gridRect = gridContainer.getBoundingClientRect();
-            dot.style.left = (rect.left + rect.width/2 - gridRect.left - 7) + 'px';
-            dot.style.top = (rect.top + rect.height/2 - gridRect.top - 7) + 'px';
-            gridContainer.appendChild(dot);
-        }
-        
-        // Add a gem to the current path
-        function addToPath(row, col) {
-            // If the path is empty, return
-            if (gameState.currentPath.length === 0) return;
-            
-            // Get the last gem in the path
-            const lastGem = gameState.currentPath[gameState.currentPath.length - 1];
-            
-            // Check if the new gem is adjacent to the last one
-            if (!areGemsAdjacent(lastGem.row, lastGem.col, row, col)) return;
-            
-            // Check if the gem is already in the path
-            const gemIndex = gameState.currentPath.findIndex(gem => gem.row === row && gem.col === col);
-            const isInPath = gemIndex !== -1;
-            
-            if (isInPath) {
-                // Only allow backtracking to the previous gem in the path
-                if (gemIndex === gameState.currentPath.length - 2) {
-                    // Remove the last gem from the path
-                    const removed = gameState.currentPath.pop();
-                    const removedElement = gameState.gemElements[removed.row][removed.col];
-                    removedElement.classList.remove('active');
-                    
-                    // Remove the last line
-                    const lines = document.querySelectorAll('.path-line');
-                    if (lines.length > 0) {
-                        lines[lines.length - 1].remove();
-                    }
-                    
-                    // Remove the last dot
-                    const dots = document.querySelectorAll('.path-dot');
-                    if (dots.length > 0) {
-                        dots[dots.length - 1].remove();
-                    }
-                    
-                    // Update real-time gem visualization
-                    updateRealTimeGems();
-                    
-                    // Play swap sound
-                    sounds.swap.currentTime = 0;
-                    sounds.swap.play();
-                }
-                
-                return;
-            }
-            
-            // Add the gem to the path
-            gameState.currentPath.push({ row, col });
-            
-            // Mark the gem as active
-            const gemElement = gameState.gemElements[row][col];
-            gemElement.classList.add('active');
-            
-            // Draw line connecting to the previous gem
-            drawPathLine(lastGem.row, lastGem.col, row, col);
-            
-            // Add dot at the new position
-            const dot = document.createElement('div');
-            dot.className = 'path-dot';
-            const rect = gemElement.getBoundingClientRect();
-            const gridRect = gridContainer.getBoundingClientRect();
-            dot.style.left = (rect.left + rect.width/2 - gridRect.left - 7) + 'px';
-            dot.style.top = (rect.top + rect.height/2 - gridRect.top - 7) + 'px';
-            gridContainer.appendChild(dot);
-            
-            // Update real-time gem visualization
-            updateRealTimeGems();
-            
-            // Play swap sound
-            sounds.swap.currentTime = 0;
-            sounds.swap.play();
-        }
-        
-        // Update gem positions in real-time as user drags
-        function updateRealTimeGems() {
-            // Create a temporary copy of the original grid
-            const originalGrid = [];
-            for (let row = 0; row < GRID_SIZE; row++) {
-                originalGrid[row] = [];
-                for (let col = 0; col < GRID_SIZE; col++) {
-                    originalGrid[row][col] = { ...gameState.grid[row][col] };
-                }
-            }
-            
-            // Apply the path movement in the temporary grid
-            if (gameState.currentPath.length > 1) {
-                const startingGem = gameState.startingGem;
-                const startPos = gameState.startingGemPosition;
-                const endPos = gameState.currentPath[gameState.currentPath.length - 1];
-                
-                // Move gems along path
-                for (let i = 0; i < gameState.currentPath.length - 1; i++) {
-                    const current = gameState.currentPath[i];
-                    const next = gameState.currentPath[i + 1];
-                    
-                    originalGrid[current.row][current.col] = { ...originalGrid[next.row][next.col] };
-                }
-                
-                // Place starting gem at end of path
-                originalGrid[endPos.row][endPos.col] = startingGem;
-                
-                // Update the UI based on the temporary grid
-                for (let row = 0; row < GRID_SIZE; row++) {
-                    for (let col = 0; col < GRID_SIZE; col++) {
-                        const gemElement = gameState.gemElements[row][col];
-                        const gem = originalGrid[row][col];
-                        
-                        // Only update the visual appearance, not the actual game state
-                        if (gem) {
-                            // Update class to match gem type
-                            gemElement.className = `gem ${gem.id}`;
-                            if (gameState.currentPath.some(p => p.row === row && p.col === col)) {
-                                gemElement.classList.add('active');
-                            }
-                            
-                            // Update icon
-                            while (gemElement.firstChild) {
-                                gemElement.removeChild(gemElement.firstChild);
-                            }
-                            gemElement.appendChild(createGemIcon(gem.id));
-                        }
-                    }
-                }
-            }
-        }
-        
-        // Draw a line between two gems
-        function drawPathLine(row1, col1, row2, col2) {
-            const gem1 = gameState.gemElements[row1][col1];
-            const gem2 = gameState.gemElements[row2][col2];
-            
-            const rect1 = gem1.getBoundingClientRect();
-            const rect2 = gem2.getBoundingClientRect();
-            const gridRect = gridContainer.getBoundingClientRect();
-            
-            const x1 = rect1.left + rect1.width/2 - gridRect.left;
-            const y1 = rect1.top + rect1.height/2 - gridRect.top;
-            const x2 = rect2.left + rect2.width/2 - gridRect.left;
-            const y2 = rect2.top + rect2.height/2 - gridRect.top;
-            
-            const length = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
-            const angle = Math.atan2(y2 - y1, x2 - x1);
-            
-            const line = document.createElement('div');
-            line.className = 'path-line';
-            line.style.width = length + 'px';
-            line.style.height = '4px';
-            line.style.left = x1 + 'px';
-            line.style.top = (y1 - 2) + 'px';
-            line.style.transformOrigin = '0 50%';
-            line.style.transform = `rotate(${angle}rad)`;
-            
-            gridContainer.appendChild(line);
-        }
-        
-        // Start the path timer
-        function startPathTimer() {
-            // Show timer
-            timerContainer.style.display = 'block';
-            gameState.pathTimeLeft = PATH_MOVE_TIME;
-            updateTimerDisplay();
-            
-            // Clear any existing timer
-            if (gameState.pathTimer) {
-                clearInterval(gameState.pathTimer);
-            }
-            
-            // Start timer sound
-            sounds.timer.currentTime = 0;
-            sounds.timer.play();
-            
-            // Start new timer
-            const startTime = Date.now();
-            let lastSecond = PATH_MOVE_TIME;
-            
-            gameState.pathTimer = setInterval(() => {
-                const elapsedSeconds = (Date.now() - startTime) / 1000;
-                gameState.pathTimeLeft = Math.max(0, PATH_MOVE_TIME - elapsedSeconds);
-                
-                // Play tick sound when a second passes
-                const currentSecond = Math.ceil(gameState.pathTimeLeft);
-                if (currentSecond < lastSecond) {
-                    lastSecond = currentSecond;
-                    // Play a tick sound for the last 3 seconds
-                    if (currentSecond <= 3 && currentSecond > 0) {
-                        sounds.timer.currentTime = 0;
-                        sounds.timer.play();
-                    }
-                }
-                
-                updateTimerDisplay();
-                
-                if (gameState.pathTimeLeft <= 0) {
-                    finishPath();
-                }
-            }, 100);
-        }
-        
-        // Update the timer display
-        function updateTimerDisplay() {
-            const percentage = (gameState.pathTimeLeft / PATH_MOVE_TIME) * 100;
-            timerCircle.textContent = Math.ceil(gameState.pathTimeLeft);
-            timerCircle.style.background = `conic-gradient(#ffb703 ${percentage}%, transparent ${percentage}%)`;
-        }
-        
-        // Finish the current path
-        function finishPath() {
-            // Stop the timer
-            if (gameState.pathTimer) {
-                clearInterval(gameState.pathTimer);
-                gameState.pathTimer = null;
-            }
-            
-            // Hide timer
-            timerContainer.style.display = 'none';
-            
-            // If path is too short, cancel
-            if (gameState.currentPath.length <= 1) {
-                cancelPath();
-                return;
-            }
-            
-            // We've already been updating the visuals in real time,
-            // now we need to actually update the game state
-            
-            // Process the path - swap gems along the path
-            const startGem = gameState.currentPath[0];
-            const endGem = gameState.currentPath[gameState.currentPath.length - 1];
-            
-            // Get the gem types
-            const startGemType = gameState.startingGem;
-            
-            // Move the start gem along the path
-            for (let i = 0; i < gameState.currentPath.length - 1; i++) {
-                const current = gameState.currentPath[i];
-                const next = gameState.currentPath[i + 1];
-                
-                // Swap current with next
-                gameState.grid[current.row][current.col] = gameState.grid[next.row][next.col];
-            }
-            
-            // Place the start gem at the end
-            gameState.grid[endGem.row][endGem.col] = startGemType;
-            
-            // Remove path visuals
-            clearPathVisuals();
-            
-            // Update the UI (should be minimal since we've been updating in real-time)
-            updateGridUI();
-            
-            // Check for matches
-            const matches = checkMatches();
-            if (matches.length > 0) {
-                // Found matches - process them
-                setTimeout(() => {
-                    // Play match sound
-                    sounds.match.currentTime = 0;
-                    sounds.match.play();
-                    
-                    resolveMatches(matches);
-                }, 300);
-            } else {
-                // No matches - enemy's turn
-                setTimeout(() => {
-                    enemyAttack();
-                }, 500);
-            }
-            
-            // End path mode
-            gameState.pathMode = false;
-        }
-        
-        // Cancel the current path
-        function cancelPath() {
-            // Clear path visuals
-            clearPathVisuals();
-            
-            // Reset path
-            gameState.currentPath = [];
-            
-            // End path mode
-            gameState.pathMode = false;
-        }
-        
-        // Clear path visuals
-        function clearPathVisuals() {
-            // Remove active class from all gems
-            document.querySelectorAll('.gem.active').forEach(gem => {
-                gem.classList.remove('active');
-            });
-            
-            // Remove path lines and dots
-            document.querySelectorAll('.path-line, .path-dot').forEach(el => {
-                el.remove();
-            });
-        }
-        
-        // Check if two gems are adjacent
-        function areGemsAdjacent(row1, col1, row2, col2) {
-            return (
-                (Math.abs(row1 - row2) === 1 && col1 === col2) ||
-                (Math.abs(col1 - col2) === 1 && row1 === row2)
-            );
-        }
-        
-        // Check for matches in the grid
-        function checkMatches() {
-            const matches = [];
-            
-            // Check horizontal matches
-            for (let row = 0; row < GRID_SIZE; row++) {
-                for (let col = 0; col < GRID_SIZE - 2; col++) {
-                    const currentType = gameState.grid[row][col].id;
-                    if (
-                        currentType === gameState.grid[row][col + 1].id &&
-                        currentType === gameState.grid[row][col + 2].id
-                    ) {
-                        // Found a horizontal match of at least 3
-                        const matchedGems = [];
-                        let nextCol = col;
-                        
-                        // Extend match if more than 3 in a row
-                        while (
-                            nextCol < GRID_SIZE && 
-                            gameState.grid[row][nextCol].id === currentType
-                        ) {
-                            matchedGems.push({ row, col: nextCol });
-                            nextCol++;
-                        }
-                        
-                        matches.push({
-                            type: currentType,
-                            gems: matchedGems,
-                            direction: 'horizontal'
-                        });
-                        
-                        // Skip the matched gems to avoid duplicate matches
-                        col = nextCol - 1;
-                    }
-                }
-            }
-            
-            // Check vertical matches
-            for (let col = 0; col < GRID_SIZE; col++) {
-                for (let row = 0; row < GRID_SIZE - 2; row++) {
-                    const currentType = gameState.grid[row][col].id;
-                    if (
-                        currentType === gameState.grid[row + 1][col].id &&
-                        currentType === gameState.grid[row + 2][col].id
-                    ) {
-                        // Found a vertical match of at least 3
-                        const matchedGems = [];
-                        let nextRow = row;
-                        
-                        // Extend match if more than 3 in a row
-                        while (
-                            nextRow < GRID_SIZE && 
-                            gameState.grid[nextRow][col].id === currentType
-                        ) {
-                            matchedGems.push({ row: nextRow, col });
-                            nextRow++;
-                        }
-                        
-                        matches.push({
-                            type: currentType,
-                            gems: matchedGems,
-                            direction: 'vertical'
-                        });
-                        
-                        // Skip the matched gems to avoid duplicate matches
-                        row = nextRow - 1;
-                    }
-                }
-            }
-            
-            return matches;
-        }
-        
-        // Highlight matches on the grid
-        function highlightMatches(matches) {
-            // Remove any existing highlights
-            document.querySelectorAll('.highlight-match').forEach(el => el.remove());
-            
-            // Create a highlight box for each match
-            matches.forEach(match => {
-                if (match.direction === 'horizontal') {
-                    // Calculate dimensions for horizontal match
-                    const firstGem = gameState.gemElements[match.gems[0].row][match.gems[0].col];
-                    const lastGem = gameState.gemElements[match.gems[match.gems.length - 1].row][match.gems[match.gems.length - 1].col];
-                    const firstRect = firstGem.getBoundingClientRect();
-                    const lastRect = lastGem.getBoundingClientRect();
-                    const gridRect = gridContainer.getBoundingClientRect();
-                    
-                    const left = firstRect.left - gridRect.left;
-                    const top = firstRect.top - gridRect.top;
-                    const width = (lastRect.right - firstRect.left);
-                    const height = firstRect.height;
-                    
-                    // Create highlight element
-                    const highlight = document.createElement('div');
-                    highlight.className = 'highlight-match';
-                    highlight.style.left = left + 'px';
-                    highlight.style.top = top + 'px';
-                    highlight.style.width = width + 'px';
-                    highlight.style.height = height + 'px';
-                    
-                    gridContainer.appendChild(highlight);
-                } else if (match.direction === 'vertical') {
-                    // Calculate dimensions for vertical match
-                    const firstGem = gameState.gemElements[match.gems[0].row][match.gems[0].col];
-                    const lastGem = gameState.gemElements[match.gems[match.gems.length - 1].row][match.gems[match.gems.length - 1].col];
-                    const firstRect = firstGem.getBoundingClientRect();
-                    const lastRect = lastGem.getBoundingClientRect();
-                    const gridRect = gridContainer.getBoundingClientRect();
-                    
-                    const left = firstRect.left - gridRect.left;
-                    const top = firstRect.top - gridRect.top;
-                    const width = firstRect.width;
-                    const height = (lastRect.bottom - firstRect.top);
-                    
-                    // Create highlight element
-                    const highlight = document.createElement('div');
-                    highlight.className = 'highlight-match';
-                    highlight.style.left = left + 'px';
-                    highlight.style.top = top + 'px';
-                    highlight.style.width = width + 'px';
-                    highlight.style.height = height + 'px';
-                    
-                    gridContainer.appendChild(highlight);
-                }
-            });
-        }
-        
-        // Resolve matches and apply effects
-        function resolveMatches(matches) {
-            // Highlight matches
-            highlightMatches(matches);
-            
-            // Show combo text if multiple matches
-            if (matches.length > 1) {
-                // Play combo sound
-                sounds.combo.currentTime = 0;
-                sounds.combo.play();
-                
-                comboText.textContent = `COMBO x${matches.length}!`;
-                comboText.style.animation = 'combo-popup 1.5s forwards';
-                setTimeout(() => {
-                    comboText.style.animation = '';
-                }, 1500);
-                
-                // Add more intense effects for combos
-                const totalGems = matches.reduce((total, match) => total + match.gems.length, 0);
-                
-                // Create a flash effect
-                const flash = document.createElement('div');
-                flash.style.position = 'absolute';
-                flash.style.top = '0';
-                flash.style.left = '0';
-                flash.style.width = '100%';
-                flash.style.height = '100%';
-                flash.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
-                flash.style.zIndex = '30';
-                flash.style.pointerEvents = 'none';
-                flash.style.animation = 'flash 0.5s';
-                
-                gridContainer.appendChild(flash);
-                
-                setTimeout(() => {
-                    flash.remove();
-                }, 500);
-                
-                // Add special combo animation
-                if (matches.length >= 3) {
-                    // Create particle explosion for big combos
-                    createParticleExplosion(gridContainer, matches.length * 5);
-                }
-            }
-            
-            // Wait for animation before removing
-            setTimeout(() => {
-                // Apply effects based on matches
-                matches.forEach(match => {
-                    applyGemEffect(match.type, match.gems.length);
-                    
-                    // Mark matched gems for removal
-                    match.gems.forEach(gem => {
-                        gameState.grid[gem.row][gem.col] = null;
-                    });
-                });
-                
-                // Update score
-                gameState.score += matches.reduce((total, match) => total + match.gems.length * 10, 0);
-                
-                // Update UI after removing gems
-                updateGridUI();
-                
-                // Wait for removal animation
-                setTimeout(() => {
-                    // Drop gems to fill gaps
-                    dropGems();
-                    
-                    // Check for new matches after dropping
-                    setTimeout(() => {
-                        const newMatches = checkMatches();
-                        if (newMatches.length > 0) {
-                            // Process chain reactions
-                            resolveMatches(newMatches);
-                        } else {
-                            // If enemy is defeated, spawn new one
-                            if (gameState.enemies.length === 0 || gameState.enemies[0].health <= 0) {
-                                spawnEnemy();
-                            } else {
-                                // Enemy attacks after player's turn
-                                enemyAttack();
-                            }
-                        }
-                    }, 500);
-                }, 300);
-            }, 800);
-        }
-        
-        // Apply effects based on gem type and match size
-        function applyGemEffect(gemType, matchSize) {
-            const power = matchSize * 5; // Base power multiplied by match size
-            
-            switch (gemType) {
-                case 'heart':
-                    // Heal the player
-                    gameState.health = Math.min(gameState.health + power * 10, gameState.maxHealth);
-                    showFloatingText(`+${power * 10} HP`, '#ff69b4', '28px');
-                    break;
-                case 'fire':
-                    // Deal damage to enemies
-                    if (gameState.enemies.length > 0) {
-                        gameState.enemies[0].health -= power * 15;
-                        showFloatingText(`-${power * 15} DMG`, '#ff4500', '28px');
-                        
-                        // Create attack animation
-                        createAttackAnimation('fire');
-                    }
-                    break;
-                case 'water':
-                    // Deal magic damage to enemies
-                    if (gameState.enemies.length > 0) {
-                        gameState.enemies[0].health -= power * 12;
-                        showFloatingText(`-${power * 12} MAGIC`, '#1e90ff', '28px');
-                        
-                        // Create attack animation
-                        createAttackAnimation('water');
-                    }
-                    break;
-                case 'star':
-                    // Bonus points and small healing
-                    gameState.score += power * 20;
-                    gameState.health = Math.min(gameState.health + power * 5, gameState.maxHealth);
-                    showFloatingText(`+${power * 20} PTS`, '#ffd700', '28px');
-                    break;
-                case 'moon':
-                    // Weaken enemy attack
-                    if (gameState.enemies.length > 0) {
-                        gameState.enemies[0].attack = Math.max(1, gameState.enemies[0].attack - 1);
-                        showFloatingText(`WEAKEN`, '#9370db', '28px');
-                    }
-                    break;
-                case 'leaf':
-                    // Buff heroes attack
-                    gameState.heroes.forEach(hero => {
-                        hero.attack += 1;
-                    });
-                    showFloatingText(`BUFF`, '#32cd32', '28px');
-                    break;
-            }
-            
-            // Update UI
-            updateUI();
-        }
-        
-        // Show floating text
-        function showFloatingText(text, color, fontSize) {
-            const floatingText = document.createElement('div');
-            floatingText.className = 'floating-text';
-            floatingText.textContent = text;
-            floatingText.style.color = color || 'white';
-            floatingText.style.fontSize = fontSize || '24px';
-            
-            // Position in the center of the dungeon view
-            const dungeonView = document.getElementById('dungeon-view');
-            floatingText.style.top = '40px';
-            floatingText.style.left = '50%';
-            floatingText.style.transform = 'translateX(-50%)';
-            
-            dungeonView.appendChild(floatingText);
-            
-            // Animate floating up and fading out
-            let position = 40;
-            let opacity = 1;
-            const interval = setInterval(() => {
-                position -= 1;
-                opacity -= 0.02;
-                floatingText.style.top = position + 'px';
-                floatingText.style.opacity = opacity;
-                
-                if (opacity <= 0) {
-                    clearInterval(interval);
-                    floatingText.remove();
-                }
-            }, 20);
-        }
-        
-        // Create attack animation
-        function createAttackAnimation(type) {
-            if (gameState.enemies.length === 0) return;
-            
-            const dungeon = document.getElementById('dungeon-view');
-            const projectile = document.createElement('div');
-            projectile.className = 'projectile';
-            projectile.style.position = 'absolute';
-            projectile.style.width = '20px';
-            projectile.style.height = '20px';
-            projectile.style.borderRadius = '50%';
-            projectile.style.bottom = '10px';
-            projectile.style.left = '50%';
-            projectile.style.transform = 'translateX(-50%)';
-            
-            if (type === 'fire') {
-                projectile.style.backgroundColor = '#ff4500';
-                projectile.style.boxShadow = '0 0 10px #ff4500';
-            } else if (type === 'water') {
-                projectile.style.backgroundColor = '#1e90ff';
-                projectile.style.boxShadow = '0 0 10px #1e90ff';
-            }
-            
-            dungeon.appendChild(projectile);
-            
-            // Animate
-            let pos = 0;
-            const anim = setInterval(() => {
-                pos += 5;
-                projectile.style.bottom = (10 + pos) + 'px';
-                
-                if (pos > 70) {
-                    clearInterval(anim);
-                    projectile.remove();
-                    
-                    // Create impact
-                    const impact = document.createElement('div');
-                    impact.style.position = 'absolute';
-                    impact.style.width = '40px';
-                    impact.style.height = '40px';
-                    impact.style.borderRadius = '50%';
-                    impact.style.top = '40px';
-                    impact.style.left = '50%';
-                    impact.style.transform = 'translate(-50%, -50%)';
-                    impact.style.backgroundColor = type === 'fire' ? 'rgba(255, 69, 0, 0.8)' : 'rgba(30, 144, 255, 0.8)';
-                    impact.style.boxShadow = type === 'fire' ? '0 0 20px #ff4500' : '0 0 20px #1e90ff';
-                    impact.style.animation = 'impact 0.3s forwards';
-                    
-                    dungeon.appendChild(impact);
-                    
-                    // Shake enemy
-                    const enemy = document.querySelector('.enemy');
-                    if (enemy) {
-                        enemy.style.animation = 'shake 0.3s';
-                        setTimeout(() => {
-                            enemy.style.animation = '';
-                        }, 300);
-                    }
-                    
-                    setTimeout(() => {
-                        impact.remove();
-                    }, 300);
-                }
-            }, 20);
-        }
-        
-        // Drop gems to fill gaps
-        function dropGems() {
-            // First, move existing gems down to fill gaps
-            for (let col = 0; col < GRID_SIZE; col++) {
-                // Count empty spaces from bottom to top
-                let emptySpaces = 0;
-                
-                for (let row = GRID_SIZE - 1; row >= 0; row--) {
-                    if (gameState.grid[row][col] === null) {
-                        emptySpaces++;
-                    } else if (emptySpaces > 0) {
-                        // Move gem down by the number of empty spaces
-                        gameState.grid[row + emptySpaces][col] = gameState.grid[row][col];
-                        gameState.grid[row][col] = null;
-                    }
-                }
-                
-                // Fill top rows with new random gems
-                for (let row = 0; row < emptySpaces; row++) {
-                    const randomIndex = Math.floor(Math.random() * GEM_TYPES.length);
-                    gameState.grid[row][col] = { ...GEM_TYPES[randomIndex] };
-                }
-            }
-            
-            // Update UI after dropping
-            updateGridUI();
-        }
-        
-        // Update the entire grid UI
-        function updateGridUI() {
-            for (let row = 0; row < GRID_SIZE; row++) {
-                for (let col = 0; col < GRID_SIZE; col++) {
-                    const gemElement = gameState.gemElements[row][col];
-                    const gem = gameState.grid[row][col];
-                    
-                    if (gem) {
-                        // Update class to match gem type
-                        gemElement.className = `gem ${gem.id}`;
-                        
-                        // Update icon
-                        while (gemElement.firstChild) {
-                            gemElement.removeChild(gemElement.firstChild);
-                        }
-                        gemElement.appendChild(createGemIcon(gem.id));
-                    }
-                }
-            }
-        }
-        
-        // Enemy attack
-        function enemyAttack() {
-            if (gameState.enemies.length === 0) return;
-            
-            const enemy = gameState.enemies[0];
-            const damage = enemy.attack;
-            
-            // Apply damage to player
-            gameState.health = Math.max(0, gameState.health - damage);
-            
-            // Show damage
-            showFloatingText(`-${damage} HP`, '#ff4500', '28px');
-            
-            // Flash the enemy to show attack
-            const enemyElement = document.querySelector('.enemy');
-            if (enemyElement) {
-                enemyElement.style.animation = 'shake 0.5s';
-                setTimeout(() => {
-                    enemyElement.style.animation = '';
-                }, 500);
-            }
-            
-            // Check if player is defeated
-            if (gameState.health <= 0) {
-                gameOver(false);
-                return;
-            }
-            
-            // Update UI
-            updateUI();
-        }
-        
-        // Spawn a new enemy
-        function spawnEnemy() {
-            // Calculate enemy stats based on score
-            const level = Math.floor(gameState.score / 500) + 1;
-            const health = 80 + (level * 20);
-            const attack = 5 + Math.floor(level / 2);
-            
-            // Create new enemy
-            gameState.enemies = [{
-                name: `Enemy Lvl ${level}`,
-                health: health,
-                maxHealth: health,
-                attack: attack
-            }];
-            
-            // Update UI
-            updateUI();
-            
-            // Show level up message
-            showFloatingText(`LEVEL ${level}!`, '#ffd700', '32px');
-        }
-        
-        // Game over
-        function gameOver(victory = false) {
-            // Create game over overlay
-            const overlay = document.createElement('div');
-            overlay.style.position = 'absolute';
-            overlay.style.top = '0';
-            overlay.style.left = '0';
-            overlay.style.width = '100%';
-            overlay.style.height = '100%';
-            overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
-            overlay.style.display = 'flex';
-            overlay.style.flexDirection = 'column';
-            overlay.style.justifyContent = 'center';
-            overlay.style.alignItems = 'center';
-            overlay.style.zIndex = '100';
-            
-            const message = document.createElement('h1');
-            message.textContent = victory ? 'VICTORY!' : 'GAME OVER';
-            message.style.color = victory ? '#ffd700' : '#ff4500';
-            message.style.fontSize = '36px';
-            message.style.marginBottom = '20px';
-            
-            const score = document.createElement('p');
-            score.textContent = `Score: ${gameState.score}`;
-            score.style.color = 'white';
-            score.style.fontSize = '24px';
-            score.style.marginBottom = '30px';
-            
-            const restartButton = document.createElement('button');
-            restartButton.textContent = 'Play Again';
-            restartButton.style.padding = '15px 30px';
-            restartButton.style.fontSize = '20px';
-            restartButton.style.backgroundColor = '#4caf50';
-            restartButton.style.color = 'white';
-            restartButton.style.border = 'none';
-            restartButton.style.borderRadius = '5px';
-            restartButton.style.cursor = 'pointer';
-            
-            restartButton.addEventListener('click', () => {
-                overlay.remove();
-                startNewGame();
-            });
-            
-            overlay.appendChild(message);
-            overlay.appendChild(score);
-            overlay.appendChild(restartButton);
-            
-            document.getElementById('game-container').appendChild(overlay);
-        }
-        
-        // Update UI elements based on game state
-        function updateUI() {
-            // Update health bar
-            const healthPercentage = (gameState.health / gameState.maxHealth) * 100;
-            healthFill.style.width = `${healthPercentage}%`;
-            healthText.textContent = `${gameState.health}/${gameState.maxHealth}`;
-            
-            // Update enemy health
-            if (gameState.enemies.length > 0) {
-                const enemy = gameState.enemies[0];
-                
-                // Check if enemy is defeated
-                if (enemy.health <= 0) {
-                    showFloatingText('ENEMY DEFEATED!', '#ffd700', '32px');
-                    
-                    // Fade out enemy
-                    const enemyElement = document.querySelector('.enemy');
-                    if (enemyElement) {
-                        enemyElement.style.transition = 'opacity 0.5s';
-                        enemyElement.style.opacity = '0';
-                        
-                        setTimeout(() => {
-                            // Remove enemy
-                            gameState.enemies = [];
-                            
-                            // Spawn new enemy after delay
-                            setTimeout(() => {
-                                spawnEnemy();
-                                
-                                // Fade in new enemy
-                                const newEnemyElement = document.querySelector('.enemy');
-                                if (newEnemyElement) {
-                                    newEnemyElement.style.opacity = '1';
-                                }
-                            }, 1000);
-                        }, 500);
-                    }
-                }
-            }
-            
-            // Update hero stats
-            const heroCards = document.querySelectorAll('.hero-card');
-            gameState.heroes.forEach((hero, index) => {
-                if (index < heroCards.length) {
-                    const statsElement = heroCards[index].querySelector('.hero-stats');
-                    if (statsElement) {
-                        statsElement.textContent = `${hero.attack} ⚔️`;
-                    }
-                }
-            });
-        }
-        
-        // Start new game
-        function startNewGame() {
-            // Reset game state
-            gameState = {
-                grid: [],
-                heroes: [
-                    { name: 'Warrior', health: 100, attack: 11 },
-                    { name: 'Mage', health: 80, attack: 16 },
-                    { name: 'Healer', health: 70, attack: 8 }
-                ],
-                enemies: [],
-                health: 15700,
-                maxHealth: 15705,
-                score: 0,
-                pathMode: false,
-                pathTimer: null,
-                pathTimeLeft: PATH_MOVE_TIME,
-                currentPath: [],
-                gemElements: []
-            };
-            
-            // Spawn initial enemy
-            spawnEnemy();
-            
-            // Initialize grid
-            initializeGrid();
-            
-            // Update UI
-            updateUI();
-        }
-        
-        // Create particle explosion effect
-        function createParticleExplosion(container, numParticles) {
-            const containerRect = container.getBoundingClientRect();
-            const centerX = containerRect.width / 2;
-            const centerY = containerRect.height / 2;
-            
-            for (let i = 0; i < numParticles; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                particle.style.position = 'absolute';
-                particle.style.width = '6px';
-                particle.style.height = '6px';
-                particle.style.borderRadius = '50%';
-                particle.style.backgroundColor = getRandomColor();
-                particle.style.zIndex = '40';
-                particle.style.pointerEvents = 'none';
-                
-                // Start at center
-                particle.style.left = centerX + 'px';
-                particle.style.top = centerY + 'px';
-                
-                // Random direction and speed
-                const angle = Math.random() * Math.PI * 2;
-                const speed = 2 + Math.random() * 3;
-                const distance = 30 + Math.random() * 100;
-                
-                const targetX = centerX + Math.cos(angle) * distance;
-                const targetY = centerY + Math.sin(angle) * distance;
-                
-                // Add to container
-                container.appendChild(particle);
-                
-                // Animate the particle
-                let progress = 0;
-                const animateParticle = () => {
-                    progress += 0.02;
-                    
-                    if (progress >= 1) {
-                        particle.remove();
-                        return;
-                    }
-                    
-                    // Ease out
-                    const easeProgress = 1 - Math.pow(1 - progress, 3);
-                    
-                    // Move from center to target
-                    const currentX = centerX + (targetX - centerX) * easeProgress;
-                    const currentY = centerY + (targetY - centerY) * easeProgress;
-                    
-                    // Add gravity effect
-                    const gravity = 100 * progress * progress;
-                    
-                    particle.style.left = currentX + 'px';
-                    particle.style.top = (currentY + gravity) + 'px';
-                    particle.style.opacity = 1 - easeProgress;
-                    
-                    requestAnimationFrame(animateParticle);
+            const startButton = document.getElementById('start-game-btn');
+            const gridContainer = document.getElementById('grid-container');
+            
+            // Setup start button
+            if (startButton) {
+                startButton.onclick = function() {
+                    startGame();
+                    return false;
                 };
+            }
+            
+            // Game setup function
+            function startGame() {
+                console.log("Game starting...");
                 
-                requestAnimationFrame(animateParticle);
-            }
-        }
-        
-        // Get random color for particles
-        function getRandomColor() {
-            const colors = [
-                '#ff4500', // fire
-                '#1e90ff', // water
-                '#ff69b4', // heart
-                '#32cd32', // leaf
-                '#ffd700', // star
-                '#9370db'  // moon
-            ];
-            
-            return colors[Math.floor(Math.random() * colors.length)];
-        }
-        
-        // Add CSS for animations
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes impact {
-                0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
-                100% { transform: translate(-50%, -50%) scale(3); opacity: 0; }
+                // Hide start overlay
+                if (startOverlay) {
+                    startOverlay.style.display = "none";
+                }
+                
+                // Initialize game grid
+                createGameGrid();
             }
             
-            @keyframes shake {
-                0%, 100% { transform: translateX(0); }
-                25% { transform: translateX(-5px); }
-                75% { transform: translateX(5px); }
+            // Create game grid
+            function createGameGrid() {
+                // Clear grid
+                gridContainer.innerHTML = '';
+                
+                // Gem types
+                const gemTypes = [
+                    { type: 'water', symbol: '💧' },
+                    { type: 'fire', symbol: '🔥' },
+                    { type: 'heart', symbol: '❤️' },
+                    { type: 'leaf', symbol: '🍃' },
+                    { type: 'star', symbol: '⭐' },
+                    { type: 'moon', symbol: '🌙' }
+                ];
+                
+                // Create grid
+                for (let row = 0; row < 6; row++) {
+                    for (let col = 0; col < 6; col++) {
+                        const gem = document.createElement('div');
+                        const randomType = gemTypes[Math.floor(Math.random() * gemTypes.length)];
+                        
+                        gem.className = `gem ${randomType.type}`;
+                        gem.textContent = randomType.symbol;
+                        gem.dataset.row = row;
+                        gem.dataset.col = col;
+                        
+                        gridContainer.appendChild(gem);
+                    }
+                }
             }
             
-            @keyframes flash {
-                0% { opacity: 0.3; }
-                50% { opacity: 0.1; }
-                100% { opacity: 0; }
-            }
-        `;
-        document.head.appendChild(style);
+            // Add another way to start the game (for backup)
+            document.addEventListener('click', function(e) {
+                if (e.target.id === 'start-game-btn' || e.target.classList.contains('start-button')) {
+                    startGame();
+                }
+            });
+        };
     </script>
 </body>
 </html>
