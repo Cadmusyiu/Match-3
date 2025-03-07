@@ -1144,26 +1144,43 @@
                 
                 // Apply the path movement in the temporary grid
                 if (gameState.currentPath.length > 1) {
+                    // We need to follow the exact path to determine where each gem should be
+                    
+                    // First, get the starting gem
                     const startingGem = gameState.startingGem;
                     const startPos = gameState.startingGemPosition;
-                    const endPos = gameState.currentPath[gameState.currentPath.length - 1];
                     
-                    // Move gems along path
-                    for (let i = 0; i < gameState.currentPath.length - 1; i++) {
-                        const current = gameState.currentPath[i];
-                        const next = gameState.currentPath[i + 1];
-                        
-                        originalGrid[current.row][current.col] = { ...originalGrid[next.row][next.col] };
+                    // Create a new grid to track movements
+                    const pathGrid = [];
+                    for (let row = 0; row < GRID_SIZE; row++) {
+                        pathGrid[row] = [];
+                        for (let col = 0; col < GRID_SIZE; col++) {
+                            pathGrid[row][col] = { ...originalGrid[row][col] };
+                        }
                     }
                     
-                    // Place starting gem at end of path
-                    originalGrid[endPos.row][endPos.col] = startingGem;
+                    // Follow the path step by step
+                    // Every time we move, we push the gem from the "to" position back to the "from" position
+                    // Except for the very first position which gets the starting gem at the end
                     
-                    // Update the UI based on the temporary grid
+                    // For each step in the path
+                    for (let i = 0; i < gameState.currentPath.length - 1; i++) {
+                        const from = gameState.currentPath[i];
+                        const to = gameState.currentPath[i + 1];
+                        
+                        // Move the gem at "to" position back to the "from" position
+                        pathGrid[from.row][from.col] = { ...pathGrid[to.row][to.col] };
+                    }
+                    
+                    // Place starting gem at the end position
+                    const endPos = gameState.currentPath[gameState.currentPath.length - 1];
+                    pathGrid[endPos.row][endPos.col] = startingGem;
+                    
+                    // Update the UI based on the calculated grid
                     for (let row = 0; row < GRID_SIZE; row++) {
                         for (let col = 0; col < GRID_SIZE; col++) {
                             const gemElement = gameState.gemElements[row][col];
-                            const gem = originalGrid[row][col];
+                            const gem = pathGrid[row][col];
                             
                             // Only update the visual appearance, not the actual game state
                             if (gem) {
@@ -1208,17 +1225,30 @@
                 // Get the gem types
                 const startGemType = gameState.startingGem;
                 
-                // Move the start gem along the path
-                for (let i = 0; i < gameState.currentPath.length - 1; i++) {
-                    const current = gameState.currentPath[i];
-                    const next = gameState.currentPath[i + 1];
-                    
-                    // Swap current with next
-                    gameState.grid[current.row][current.col] = gameState.grid[next.row][next.col];
+                // Create a new grid to track movements
+                const newGrid = [];
+                for (let row = 0; row < GRID_SIZE; row++) {
+                    newGrid[row] = [];
+                    for (let col = 0; col < GRID_SIZE; col++) {
+                        newGrid[row][col] = { ...gameState.grid[row][col] };
+                    }
                 }
                 
-                // Place the start gem at the end
-                gameState.grid[endGem.row][endGem.col] = startGemType;
+                // Follow the path step by step
+                // Every time we move, we push the gem from the "to" position back to the "from" position
+                for (let i = 0; i < gameState.currentPath.length - 1; i++) {
+                    const from = gameState.currentPath[i];
+                    const to = gameState.currentPath[i + 1];
+                    
+                    // Move the gem at "to" position back to the "from" position
+                    newGrid[from.row][from.col] = { ...newGrid[to.row][to.col] };
+                }
+                
+                // Place starting gem at the end position
+                newGrid[endGem.row][endGem.col] = startGemType;
+                
+                // Update the actual game grid
+                gameState.grid = newGrid;
                 
                 // Remove path visuals
                 clearPathVisuals();
