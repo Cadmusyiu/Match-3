@@ -1143,27 +1143,24 @@
                 }
                 
                 // Apply the path movement in the temporary grid
-                if (gameState.currentPath.length > 1) {
-                    // Track the current position of our carried gem (starts at the first position)
-                    let carriedGem = { ...tempGrid[gameState.currentPath[0].row][gameState.currentPath[0].col] };
+                if (gameState.currentPath.length > 0) {
+                    // We're going to swap gems along the path
+                    // Starting with the original position
+                    let currentGem = { ...tempGrid[gameState.currentPath[0].row][gameState.currentPath[0].col] };
                     
-                    // For each step in the path
-                    for (let i = 0; i < gameState.currentPath.length - 1; i++) {
-                        const current = gameState.currentPath[i];
-                        const next = gameState.currentPath[i + 1];
+                    // For each step in the path, swap the current gem with the next one
+                    for (let i = 1; i < gameState.currentPath.length; i++) {
+                        const prev = gameState.currentPath[i-1];
+                        const curr = gameState.currentPath[i];
                         
-                        // Save the gem at the next position (this will get pushed back)
-                        let nextGem = { ...tempGrid[next.row][next.col] };
-                        
-                        // Move our carried gem to the next position
-                        tempGrid[next.row][next.col] = carriedGem;
-                        
-                        // The next gem becomes our carried gem for the next step
-                        carriedGem = nextGem;
-                        
-                        // The pushed gem goes to our current position
-                        tempGrid[current.row][current.col] = nextGem;
+                        // Swap the current gem with the next gem
+                        const nextGem = { ...tempGrid[curr.row][curr.col] };
+                        tempGrid[curr.row][curr.col] = currentGem;
+                        currentGem = nextGem;
                     }
+                    
+                    // The last swapped gem goes to the first position in the path
+                    tempGrid[gameState.currentPath[0].row][gameState.currentPath[0].col] = currentGem;
                     
                     // Update the UI based on the temporary grid
                     for (let row = 0; row < GRID_SIZE; row++) {
@@ -1216,25 +1213,25 @@
                     }
                 }
                 
-                // Track the current position of our carried gem (starts at the first position)
-                let carriedGem = { ...tempGrid[gameState.currentPath[0].row][gameState.currentPath[0].col] };
-                
-                // For each step in the path
-                for (let i = 0; i < gameState.currentPath.length - 1; i++) {
-                    const current = gameState.currentPath[i];
-                    const next = gameState.currentPath[i + 1];
+                // Apply the path movement in the grid
+                if (gameState.currentPath.length > 0) {
+                    // We're going to swap gems along the path
+                    // Starting with the original position
+                    let currentGem = { ...tempGrid[gameState.currentPath[0].row][gameState.currentPath[0].col] };
                     
-                    // Save the gem at the next position (this will get pushed back)
-                    let nextGem = { ...tempGrid[next.row][next.col] };
+                    // For each step in the path, swap the current gem with the next one
+                    for (let i = 1; i < gameState.currentPath.length; i++) {
+                        const prev = gameState.currentPath[i-1];
+                        const curr = gameState.currentPath[i];
+                        
+                        // Swap the current gem with the next gem
+                        const nextGem = { ...tempGrid[curr.row][curr.col] };
+                        tempGrid[curr.row][curr.col] = currentGem;
+                        currentGem = nextGem;
+                    }
                     
-                    // Move our carried gem to the next position
-                    tempGrid[next.row][next.col] = carriedGem;
-                    
-                    // The next gem becomes our carried gem for the next step
-                    carriedGem = nextGem;
-                    
-                    // The pushed gem goes to our current position
-                    tempGrid[current.row][current.col] = nextGem;
+                    // The last swapped gem goes to the first position in the path
+                    tempGrid[gameState.currentPath[0].row][gameState.currentPath[0].col] = currentGem;
                 }
                 
                 // Update the game grid
@@ -1485,20 +1482,20 @@
                         // Apply effects based on gem type
                         applyGemEffect(match.type, match.gems.length);
                         
-                        // Mark matched gems for removal
+                        // Mark matched gems for removal in game state
                         match.gems.forEach(gem => {
                             gameState.grid[gem.row][gem.col] = null;
                         });
                     });
                     
-                    // Update UI - visually show gems being removed
+                    // Update UI - visually remove the gems
                     for (let row = 0; row < GRID_SIZE; row++) {
                         for (let col = 0; col < GRID_SIZE; col++) {
                             const gemElement = gameState.gemElements[row][col];
-                            const gem = gameState.grid[row][col];
                             
-                            if (gem === null) {
-                                // Animate the gem disappearing
+                            // If this gem was matched (is now null in the game state)
+                            if (gameState.grid[row][col] === null) {
+                                // Animate disappearance
                                 gemElement.style.transform = 'scale(0)';
                                 gemElement.style.opacity = '0';
                                 gemElement.style.transition = 'transform 0.3s, opacity 0.3s';
@@ -1829,6 +1826,14 @@
                         if (fallDistances[row][col] > 0 && gameState.grid[row][col] !== null) {
                             const gemElement = gameState.gemElements[row][col];
                             gemElement.classList.add('falling');
+                            
+                            // Calculate the distance to fall in pixels
+                            const gemHeight = gemElement.offsetHeight + 2; // +2 for gap
+                            const fallDistance = fallDistances[row][col] * gemHeight;
+                            
+                            // Apply the falling animation
+                            gemElement.style.transform = `translateY(${fallDistance}px)`;
+                            gemElement.style.transition = 'transform 0.5s cubic-bezier(0.2, 0.8, 0.3, 1.2)';
                         }
                     }
                 }
@@ -1837,9 +1842,9 @@
                 sounds.drop.currentTime = 0;
                 sounds.drop.play();
                 
-                // Wait for animation start
+                // Wait for animation to start
                 setTimeout(() => {
-                    // Apply the actual gem movement
+                    // Apply the actual gem movement in the model data
                     for (let col = 0; col < GRID_SIZE; col++) {
                         // Count empty spaces from bottom to top
                         let emptySpaces = 0;
@@ -1861,21 +1866,47 @@
                         }
                     }
                     
-                    // Update UI after dropping
-                    updateGridUIWithAnimations(fallDistances);
-                    
-                    // Check for matches after dropping
+                    // Wait for falling animation to complete
                     setTimeout(() => {
-                        const newMatches = checkMatches();
-                        if (newMatches.length > 0) {
-                            // Found more matches (skyfall)
-                            resolveMatches(newMatches);
-                        } else {
-                            // No more matches - enemy's turn
-                            processEnemyTurn();
+                        // Reset all transitions and update UI to match model
+                        document.querySelectorAll('.gem').forEach(gem => {
+                            gem.style.transition = '';
+                            gem.style.transform = '';
+                            gem.classList.remove('falling', 'new', 'matched');
+                        });
+                        
+                        // Update the UI to show the new grid state
+                        updateGridUI();
+                        
+                        // Add appearance animation for new gems
+                        for (let row = 0; row < GRID_SIZE; row++) {
+                            for (let col = 0; col < GRID_SIZE; col++) {
+                                // If this position was empty and now has a new gem
+                                if (row < fallDistances.reduce((max, row) => Math.max(max, row[col]), 0)) {
+                                    const gemElement = gameState.gemElements[row][col];
+                                    gemElement.classList.add('new');
+                                    
+                                    // Remove animation class after animation completes
+                                    setTimeout(() => {
+                                        gemElement.classList.remove('new');
+                                    }, 500);
+                                }
+                            }
                         }
-                    }, 600);
-                }, 300);
+                        
+                        // Check for matches after dropping
+                        setTimeout(() => {
+                            const newMatches = checkMatches();
+                            if (newMatches.length > 0) {
+                                // Found more matches (skyfall)
+                                resolveMatches(newMatches);
+                            } else {
+                                // No more matches - enemy's turn
+                                processEnemyTurn();
+                            }
+                        }, 600);
+                    }, 500); // Wait for fall animation
+                }, 100); // Small delay before updating model
             }
             
             // Update grid UI with animations for new and falling gems
