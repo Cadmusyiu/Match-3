@@ -1133,6 +1133,9 @@
             
             // Update gem positions in real-time as user drags
             function updateRealTimeGems() {
+                // If path is empty, do nothing
+                if (gameState.currentPath.length === 0) return;
+                
                 // Create a temporary copy of the original grid
                 const tempGrid = [];
                 for (let row = 0; row < GRID_SIZE; row++) {
@@ -1142,43 +1145,41 @@
                     }
                 }
                 
-                // Apply the path movement in the temporary grid
-                if (gameState.currentPath.length > 0) {
-                    // We're going to swap gems along the path
-                    // Starting with the original position
-                    let currentGem = { ...tempGrid[gameState.currentPath[0].row][gameState.currentPath[0].col] };
+                // P&D Logic: You pick up the original gem and move it along the path.
+                // Each gem you move over gets displaced to the previous position.
+                
+                // 1. Get the gem we're "holding" (the first gem in the path)
+                const holdingGem = { ...gameState.grid[gameState.currentPath[0].row][gameState.currentPath[0].col] };
+                
+                // 2. For each position in the path, move previous position's gem to current position
+                for (let i = 0; i < gameState.currentPath.length - 1; i++) {
+                    const current = gameState.currentPath[i];
+                    const next = gameState.currentPath[i + 1];
                     
-                    // For each step in the path, swap the current gem with the next one
-                    for (let i = 1; i < gameState.currentPath.length; i++) {
-                        const prev = gameState.currentPath[i-1];
-                        const curr = gameState.currentPath[i];
+                    // Move the gem from the next position to the current position
+                    tempGrid[current.row][current.col] = { ...gameState.grid[next.row][next.col] };
+                }
+                
+                // 3. Put our held gem at the last position
+                const lastPos = gameState.currentPath[gameState.currentPath.length - 1];
+                tempGrid[lastPos.row][lastPos.col] = holdingGem;
+                
+                // Update the UI based on the temporary grid
+                for (let row = 0; row < GRID_SIZE; row++) {
+                    for (let col = 0; col < GRID_SIZE; col++) {
+                        const gemElement = gameState.gemElements[row][col];
+                        const gem = tempGrid[row][col];
                         
-                        // Swap the current gem with the next gem
-                        const nextGem = { ...tempGrid[curr.row][curr.col] };
-                        tempGrid[curr.row][curr.col] = currentGem;
-                        currentGem = nextGem;
-                    }
-                    
-                    // The last swapped gem goes to the first position in the path
-                    tempGrid[gameState.currentPath[0].row][gameState.currentPath[0].col] = currentGem;
-                    
-                    // Update the UI based on the temporary grid
-                    for (let row = 0; row < GRID_SIZE; row++) {
-                        for (let col = 0; col < GRID_SIZE; col++) {
-                            const gemElement = gameState.gemElements[row][col];
-                            const gem = tempGrid[row][col];
-                            
-                            // Only update the visual appearance, not the actual game state
-                            if (gem) {
-                                // Update class to match gem type
-                                gemElement.className = `gem ${gem.id}`;
-                                if (gameState.currentPath.some(p => p.row === row && p.col === col)) {
-                                    gemElement.classList.add('active');
-                                }
-                                
-                                // Update text content (gem symbol)
-                                gemElement.textContent = gem.symbol;
+                        // Only update the visual appearance, not the actual game state
+                        if (gem) {
+                            // Update class to match gem type
+                            gemElement.className = `gem ${gem.id}`;
+                            if (gameState.currentPath.some(p => p.row === row && p.col === col)) {
+                                gemElement.classList.add('active');
                             }
+                            
+                            // Update text content (gem symbol)
+                            gemElement.textContent = gem.symbol;
                         }
                     }
                 }
@@ -1201,8 +1202,7 @@
                     return;
                 }
                 
-                // Now we need to actually update the game state
-                // Apply the exact same logic we used for visualization
+                // Apply the exact same P&D logic when finishing the path
                 
                 // Create a temporary copy of the grid
                 const tempGrid = [];
@@ -1213,26 +1213,21 @@
                     }
                 }
                 
-                // Apply the path movement in the grid
-                if (gameState.currentPath.length > 0) {
-                    // We're going to swap gems along the path
-                    // Starting with the original position
-                    let currentGem = { ...tempGrid[gameState.currentPath[0].row][gameState.currentPath[0].col] };
+                // 1. Get the gem we're "holding" (the first gem in the path)
+                const holdingGem = { ...gameState.grid[gameState.currentPath[0].row][gameState.currentPath[0].col] };
+                
+                // 2. For each position in the path, move previous position's gem to current position
+                for (let i = 0; i < gameState.currentPath.length - 1; i++) {
+                    const current = gameState.currentPath[i];
+                    const next = gameState.currentPath[i + 1];
                     
-                    // For each step in the path, swap the current gem with the next one
-                    for (let i = 1; i < gameState.currentPath.length; i++) {
-                        const prev = gameState.currentPath[i-1];
-                        const curr = gameState.currentPath[i];
-                        
-                        // Swap the current gem with the next gem
-                        const nextGem = { ...tempGrid[curr.row][curr.col] };
-                        tempGrid[curr.row][curr.col] = currentGem;
-                        currentGem = nextGem;
-                    }
-                    
-                    // The last swapped gem goes to the first position in the path
-                    tempGrid[gameState.currentPath[0].row][gameState.currentPath[0].col] = currentGem;
+                    // Move the gem from the next position to the current position
+                    tempGrid[current.row][current.col] = { ...gameState.grid[next.row][next.col] };
                 }
+                
+                // 3. Put our held gem at the last position
+                const lastPos = gameState.currentPath[gameState.currentPath.length - 1];
+                tempGrid[lastPos.row][lastPos.col] = holdingGem;
                 
                 // Update the game grid
                 gameState.grid = tempGrid;
