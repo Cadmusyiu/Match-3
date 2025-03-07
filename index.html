@@ -540,30 +540,93 @@
                 { id: 'moon', symbol: '🌙', color: '#9575cd' }
             ];
             
-            // Initialize sound effects
+            // Initialize sound effects using Web Audio API
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            const audioContext = new AudioContext();
+            
+            // Sound effect functions
             const sounds = {
-                select: new Audio('https://cdnjs.cloudflare.com/ajax/libs/soundjs/1.0.1/soundjs.min.js'), // Placeholder URLs - replace with actual sound files
-                swap: new Audio('https://cdnjs.cloudflare.com/ajax/libs/soundjs/1.0.1/soundjs.min.js'),
-                match: new Audio('https://cdnjs.cloudflare.com/ajax/libs/soundjs/1.0.1/soundjs.min.js'),
-                combo: new Audio('https://cdnjs.cloudflare.com/ajax/libs/soundjs/1.0.1/soundjs.min.js'),
-                timer: new Audio('https://cdnjs.cloudflare.com/ajax/libs/soundjs/1.0.1/soundjs.min.js'),
-                drop: new Audio('https://cdnjs.cloudflare.com/ajax/libs/soundjs/1.0.1/soundjs.min.js'),
-                enemyAttack: new Audio('https://cdnjs.cloudflare.com/ajax/libs/soundjs/1.0.1/soundjs.min.js'),
-                skillActivate: new Audio('https://cdnjs.cloudflare.com/ajax/libs/soundjs/1.0.1/soundjs.min.js')
+                select: {
+                    play: function() {
+                        playSound(220, 0.05, 'sine', 0.2);
+                    },
+                    currentTime: 0
+                },
+                swap: {
+                    play: function() {
+                        playSound(330, 0.05, 'sine', 0.2);
+                    },
+                    currentTime: 0
+                },
+                match: {
+                    play: function() {
+                        playSound(440, 0.1, 'triangle', 0.3);
+                        setTimeout(() => playSound(550, 0.1, 'triangle', 0.3), 100);
+                    },
+                    currentTime: 0
+                },
+                combo: {
+                    play: function() {
+                        playSound(660, 0.1, 'triangle', 0.4);
+                        setTimeout(() => playSound(880, 0.1, 'triangle', 0.4), 150);
+                        setTimeout(() => playSound(1100, 0.2, 'triangle', 0.4), 300);
+                    },
+                    currentTime: 0
+                },
+                timer: {
+                    play: function() {
+                        playSound(300, 0.05, 'sine', 0.2);
+                    },
+                    currentTime: 0
+                },
+                drop: {
+                    play: function() {
+                        playSound(600, 0.05, 'sine', 0.1);
+                        setTimeout(() => playSound(500, 0.05, 'sine', 0.1), 50);
+                        setTimeout(() => playSound(400, 0.05, 'sine', 0.1), 100);
+                    },
+                    currentTime: 0
+                },
+                enemyAttack: {
+                    play: function() {
+                        playSound(150, 0.3, 'sawtooth', 0.3);
+                    },
+                    currentTime: 0
+                },
+                skillActivate: {
+                    play: function() {
+                        playSound(880, 0.1, 'square', 0.2);
+                        setTimeout(() => playSound(1100, 0.2, 'square', 0.3), 100);
+                    },
+                    currentTime: 0
+                }
             };
             
-            // Initialize sound system with fallbacks
-            for (const key in sounds) {
-                // Add fallback methods in case sounds fail to load
-                const originalPlay = sounds[key].play;
-                sounds[key].play = function() {
-                    try {
-                        originalPlay.call(this);
-                    } catch (e) {
-                        console.log(`Playing ${key} sound (fallback)`);
-                    }
-                };
-                sounds[key].currentTime = 0;
+            // Function to play a sound with given parameters
+            function playSound(frequency, duration, type = 'sine', volume = 0.5) {
+                try {
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.type = type;
+                    oscillator.frequency.value = frequency;
+                    gainNode.gain.value = volume;
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    oscillator.start();
+                    
+                    // Fade out for smoother sound
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration);
+                    
+                    // Stop the oscillator after duration
+                    setTimeout(() => {
+                        oscillator.stop();
+                    }, duration * 1000);
+                } catch (e) {
+                    console.log("Failed to play sound:", e);
+                }
             }
             
             // Setup start button
@@ -598,6 +661,11 @@
             // Game setup function
             function startGame() {
                 console.log("Game starting...");
+                
+                // Start audio context (must be triggered by user interaction)
+                if (audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
                 
                 // Hide start overlay
                 if (startOverlay) {
@@ -853,9 +921,16 @@
                 const gemElement = gameState.gemElements[row][col];
                 gemElement.classList.add('active');
                 
-                // Play select sound
-                sounds.select.currentTime = 0;
-                sounds.select.play();
+                // Play select sound (ensure AudioContext is running by user interaction)
+                if (audioContext.state === 'suspended') {
+                    audioContext.resume().then(() => {
+                        sounds.select.currentTime = 0;
+                        sounds.select.play();
+                    });
+                } else {
+                    sounds.select.currentTime = 0;
+                    sounds.select.play();
+                }
                 
                 // Start the timer
                 startPathTimer();
@@ -880,18 +955,16 @@
                 const isInPath = gemIndex !== -1;
                 
                 if (isInPath) {
-                    // Allow backtracking along the path (not just to the previous gem)
-                    // This fixes the issue with not being able to go back to previously visited gems
+                    // This is the new implementation that fixes the backtracking issue
+                    // Allow backtracking to ANY previously visited gem that's adjacent to the current position
                     
-                    // Only backtrack if the gem is adjacent to the last one in the path
-                    if (gemIndex === gameState.currentPath.length - 2) {
+                    // We only need to verify it's adjacent, which we already did above
+                    // Now we can remove all gems after the target gem in the path
+                    while (gameState.currentPath.length - 1 > gemIndex) {
                         // Remove the last gem from the path
                         const removed = gameState.currentPath.pop();
                         const removedElement = gameState.gemElements[removed.row][removed.col];
                         removedElement.classList.remove('active');
-                        
-                        // Update real-time gem visualization
-                        updateRealTimeGems();
                         
                         // Remove the last line
                         const lines = document.querySelectorAll('.path-line');
@@ -904,11 +977,15 @@
                         if (dots.length > 0) {
                             dots[dots.length - 1].remove();
                         }
-                        
-                        // Play swap sound for backtracking
-                        sounds.swap.currentTime = 0;
-                        sounds.swap.play();
                     }
+                    
+                    // Update real-time gem visualization
+                    updateRealTimeGems();
+                    
+                    // Play swap sound for backtracking
+                    sounds.swap.currentTime = 0;
+                    sounds.swap.play();
+                    
                     return;
                 }
                 
