@@ -411,10 +411,86 @@
     <script>
         // Wait for page to fully load
         window.onload = function() {
-            // Game constants - Modified to 6x5 grid
+            // Game constants - 6x5 grid
             const GRID_COLS = 6;
-            const GRID_ROWS = 5; // Changed from 6 to 5
+            const GRID_ROWS = 5;
             const PATH_MOVE_TIME = 5; // seconds
+            
+            // Set up audio context and sounds
+            let audioContext;
+            
+            // Initialize Audio Context on user interaction (browser requirement)
+            function initAudio() {
+                if (!audioContext) {
+                    try {
+                        const AudioContext = window.AudioContext || window.webkitAudioContext;
+                        audioContext = new AudioContext();
+                    } catch (e) {
+                        console.error("Web Audio API not supported:", e);
+                    }
+                } else if (audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+            }
+            
+            // Sound generation function - creates the actual audio
+            function playSound(freq, duration, type, volume) {
+                if (!audioContext) return;
+                
+                try {
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.type = type || 'sine';
+                    oscillator.frequency.value = freq;
+                    gainNode.gain.value = volume || 0.1;
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    oscillator.start();
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration);
+                    
+                    setTimeout(() => {
+                        oscillator.stop();
+                    }, duration * 1000);
+                } catch (e) {
+                    console.error("Error playing sound:", e);
+                }
+            }
+            
+            // Define sound patterns
+            const sounds = {
+                select: () => {
+                    if (!audioContext) return;
+                    playSound(400, 0.1, 'sine', 0.1);
+                },
+                swap: () => {
+                    if (!audioContext) return;
+                    playSound(500, 0.1, 'sine', 0.1);
+                },
+                match: () => {
+                    if (!audioContext) return;
+                    playSound(600, 0.15, 'triangle', 0.15);
+                    setTimeout(() => playSound(700, 0.15, 'triangle', 0.15), 100);
+                },
+                combo: () => {
+                    if (!audioContext) return;
+                    playSound(600, 0.1, 'triangle', 0.2);
+                    setTimeout(() => playSound(800, 0.15, 'triangle', 0.2), 150);
+                    setTimeout(() => playSound(1000, 0.2, 'triangle', 0.2), 300);
+                },
+                timer: () => {
+                    if (!audioContext) return;
+                    playSound(300, 0.05, 'sine', 0.1);
+                },
+                drop: () => {
+                    if (!audioContext) return;
+                    playSound(500, 0.05, 'sine', 0.1);
+                    setTimeout(() => playSound(400, 0.05, 'sine', 0.1), 50);
+                    setTimeout(() => playSound(300, 0.05, 'sine', 0.1), 100);
+                }
+            };
             
             // Game state
             let gameState = {
@@ -434,9 +510,7 @@
                 pathMode: false,
                 pathTimer: null,
                 pathTimeLeft: PATH_MOVE_TIME,
-                heldGem: null,  // The gem being carried during a move
-                gemElements: [],
-                initialGrid: [] // Store the initial grid state for proper backtracking
+                gemElements: []
             };
             
             // Get DOM elements
@@ -458,37 +532,10 @@
                 { id: 'moon', symbol: '🌙', color: '#9575cd' }
             ];
             
-            // Add sound effects (placeholder functions)
-            const sounds = {
-                select: {
-                    play: function() { console.log("Playing select sound"); },
-                    currentTime: 0
-                },
-                swap: {
-                    play: function() { console.log("Playing swap sound"); },
-                    currentTime: 0
-                },
-                match: {
-                    play: function() { console.log("Playing match sound"); },
-                    currentTime: 0
-                },
-                combo: {
-                    play: function() { console.log("Playing combo sound"); },
-                    currentTime: 0
-                },
-                timer: {
-                    play: function() { console.log("Playing timer sound"); },
-                    currentTime: 0
-                },
-                drop: {
-                    play: function() { console.log("Playing drop sound"); },
-                    currentTime: 0
-                }
-            };
-            
             // Setup start button
             if (startButton) {
                 startButton.onclick = function() {
+                    initAudio(); // Initialize audio on user interaction
                     startGame();
                     return false;
                 };
@@ -634,19 +681,12 @@
                 // Add the first gem to the path
                 gameState.currentPath.push({ row, col });
                 
-                // Store the starting grid state
-                gameState.initialGrid = JSON.parse(JSON.stringify(gameState.grid));
-                
-                // Store the picked-up gem (P&D style - you hold one gem)
-                gameState.heldGem = { ...gameState.grid[row][col] };
-                
                 // Mark the gem as active
                 const gemElement = gameState.gemElements[row][col];
                 gemElement.classList.add('active');
                 
                 // Play select sound
-                sounds.select.currentTime = 0;
-                sounds.select.play();
+                sounds.select();
                 
                 // Start the timer
                 startPathTimer();
@@ -670,15 +710,15 @@
                 const gemIndex = gameState.currentPath.findIndex(gem => gem.row === row && gem.col === col);
                 
                 if (gemIndex !== -1) {
-                    // Allow backtracking only to the previous gem - Fixed backtracking logic
+                    // Allow backtracking only to the previous gem
                     if (gemIndex === gameState.currentPath.length - 2) {
                         // Remove the last gem from the path
                         const removed = gameState.currentPath.pop();
                         const removedElement = gameState.gemElements[removed.row][removed.col];
                         removedElement.classList.remove('active');
                         
-                        // Update real-time gem visualization
-                        updateRealTimeGems();
+                        // Simple swap back the gems (just for visuals)
+                        swapGems(lastGem.row, lastGem.col, row, col);
                         
                         // Remove the last line
                         const lines = document.querySelectorAll('.path-line');
@@ -693,8 +733,7 @@
                         }
                         
                         // Play swap sound for backtracking
-                        sounds.swap.currentTime = 0;
-                        sounds.swap.play();
+                        sounds.swap();
                     }
                     return;
                 }
@@ -706,18 +745,45 @@
                 const gemElement = gameState.gemElements[row][col];
                 gemElement.classList.add('active');
                 
+                // Simple swap of gems (current implementation)
+                swapGems(lastGem.row, lastGem.col, row, col);
+                
                 // Draw line connecting to the previous gem
                 drawPathLine(lastGem.row, lastGem.col, row, col);
                 
                 // Add dot at the new position
                 addPathDot(row, col);
                 
-                // Update real-time gem visualization
-                updateRealTimeGems();
-                
                 // Play swap sound
-                sounds.swap.currentTime = 0;
-                sounds.swap.play();
+                sounds.swap();
+            }
+            
+            // Swap two adjacent gems (visually and in game state)
+            function swapGems(row1, col1, row2, col2) {
+                // Get the gems
+                const gem1 = gameState.grid[row1][col1];
+                const gem2 = gameState.grid[row2][col2];
+                
+                // Swap in game state
+                gameState.grid[row1][col1] = gem2;
+                gameState.grid[row2][col2] = gem1;
+                
+                // Update visuals
+                const element1 = gameState.gemElements[row1][col1];
+                const element2 = gameState.gemElements[row2][col2];
+                
+                // Update visuals
+                element1.className = `gem ${gem2.id}`;
+                element1.textContent = gem2.symbol;
+                if (gameState.currentPath.some(p => p.row === row1 && p.col === col1)) {
+                    element1.classList.add('active');
+                }
+                
+                element2.className = `gem ${gem1.id}`;
+                element2.textContent = gem1.symbol;
+                if (gameState.currentPath.some(p => p.row === row2 && p.col === col2)) {
+                    element2.classList.add('active');
+                }
             }
             
             // Draw a line between two gems in the path
@@ -821,8 +887,7 @@
                     if (currentSecond < lastSecond) {
                         lastSecond = currentSecond;
                         if (currentSecond <= 3 && currentSecond > 0) {
-                            sounds.timer.currentTime = 0;
-                            sounds.timer.play();
+                            sounds.timer();
                         }
                     }
                     
@@ -841,52 +906,7 @@
                 timerCircle.style.background = `conic-gradient(#ffb703 ${percentage}%, transparent ${percentage}%)`;
             }
             
-            // Update gem positions in real-time as user drags (P&D style)
-            function updateRealTimeGems() {
-                if (gameState.currentPath.length === 0) return;
-                
-                // Start with the initial grid state
-                const tempGrid = JSON.parse(JSON.stringify(gameState.initialGrid));
-                
-                // The first position is the starting gem, which we're "holding"
-                const heldGem = gameState.heldGem;
-                
-                // For each step in the path (except the first one), shift gems backward
-                for (let i = 1; i < gameState.currentPath.length; i++) {
-                    const prev = gameState.currentPath[i-1];
-                    const curr = gameState.currentPath[i];
-                    
-                    // Move gem from the current position to the previous position in the path
-                    tempGrid[prev.row][prev.col] = { ...gameState.initialGrid[curr.row][curr.col] };
-                }
-                
-                // Place the held gem at the last position in the path
-                const lastPos = gameState.currentPath[gameState.currentPath.length - 1];
-                tempGrid[lastPos.row][lastPos.col] = heldGem;
-                
-                // Update the UI based on the temporary grid
-                for (let row = 0; row < GRID_ROWS; row++) {
-                    for (let col = 0; col < GRID_COLS; col++) {
-                        const gemElement = gameState.gemElements[row][col];
-                        const gem = tempGrid[row][col];
-                        
-                        if (gem) {
-                            // Update class to match gem type
-                            gemElement.className = `gem ${gem.id}`;
-                            
-                            // Add active class to gems in path
-                            if (gameState.currentPath.some(p => p.row === row && p.col === col)) {
-                                gemElement.classList.add('active');
-                            }
-                            
-                            // Update text content (gem symbol)
-                            gemElement.textContent = gem.symbol;
-                        }
-                    }
-                }
-            }
-            
-            // Finish the current path (P&D style)
+            // Finish the current path
             function finishPath() {
                 // Stop the timer
                 if (gameState.pathTimer) {
@@ -903,28 +923,6 @@
                     return;
                 }
                 
-                // Start with the initial grid state
-                const finalGrid = JSON.parse(JSON.stringify(gameState.initialGrid));
-                
-                // The first position is the starting gem, which we're "holding"
-                const heldGem = gameState.heldGem;
-                
-                // For each step in the path (except the first one), shift gems backward
-                for (let i = 1; i < gameState.currentPath.length; i++) {
-                    const prev = gameState.currentPath[i-1];
-                    const curr = gameState.currentPath[i];
-                    
-                    // Move gem from the current position to the previous position in the path
-                    finalGrid[prev.row][prev.col] = { ...gameState.initialGrid[curr.row][curr.col] };
-                }
-                
-                // Place the held gem at the last position in the path
-                const lastPos = gameState.currentPath[gameState.currentPath.length - 1];
-                finalGrid[lastPos.row][lastPos.col] = heldGem;
-                
-                // Update the game grid
-                gameState.grid = finalGrid;
-                
                 // Remove path visuals
                 clearPathVisuals();
                 
@@ -937,13 +935,11 @@
                     // Found matches - process them
                     setTimeout(() => {
                         // Play match sound
-                        sounds.match.currentTime = 0;
-                        sounds.match.play();
+                        sounds.match();
                         
                         // If it's a combo, play combo sound too
                         if (matches.length > 1) {
-                            sounds.combo.currentTime = 0;
-                            sounds.combo.play();
+                            sounds.combo();
                         }
                         
                         resolveMatches(matches);
@@ -964,8 +960,6 @@
                 
                 // Reset path
                 gameState.currentPath = [];
-                gameState.heldGem = null;
-                gameState.initialGrid = [];
                 
                 // Update the UI to restore original state
                 updateGridUI();
@@ -1207,8 +1201,7 @@
                 }
                 
                 // Play falling sound
-                sounds.drop.currentTime = 0;
-                sounds.drop.play();
+                sounds.drop();
                 
                 // Apply the model changes after a delay
                 setTimeout(() => {
@@ -1498,6 +1491,7 @@
             // Add another way to start the game (for backup)
             document.addEventListener('click', function(e) {
                 if (e.target.id === 'start-game-btn' || e.target.classList.contains('start-button')) {
+                    initAudio(); // Initialize audio on user interaction
                     startGame();
                 }
             });
