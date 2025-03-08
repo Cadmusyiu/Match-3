@@ -143,12 +143,12 @@
             width: 100%;
         }
         
-        /* Critical fix: Ensure grid container has proper layout */
+        /* Critical fix: Changed grid to 6x5 instead of 6x6 */
         #grid-container {
             flex-grow: 1;
             display: grid;
             grid-template-columns: repeat(6, 1fr);
-            grid-template-rows: repeat(6, 1fr);
+            grid-template-rows: repeat(5, 1fr);
             gap: 2px;
             padding: 2px;
             background-color: #111;
@@ -369,15 +369,15 @@
         <div id="heroes-area">
             <div class="hero-card">
                 <div class="hero-icon" style="background-color: #ab47bc;">⚔️</div>
-                <div class="hero-stats">12 ⚔️</div>
+                <div class="hero-stats">13 ⚔️</div>
             </div>
             <div class="hero-card">
                 <div class="hero-icon" style="background-color: #42a5f5;">🔮</div>
-                <div class="hero-stats">17 ⚔️</div>
+                <div class="hero-stats">18 ⚔️</div>
             </div>
             <div class="hero-card">
                 <div class="hero-icon" style="background-color: #66bb6a;">✓</div>
-                <div class="hero-stats">9 ⚔️</div>
+                <div class="hero-stats">10 ⚔️</div>
             </div>
         </div>
         
@@ -387,7 +387,7 @@
             <div id="health-bar">
                 <div id="health-fill"></div>
             </div>
-            <span>15680/15705</span>
+            <span>15695/15705</span>
         </div>
         
         <!-- Game grid -->
@@ -411,22 +411,23 @@
     <script>
         // Wait for page to fully load
         window.onload = function() {
-            // Game constants
-            const GRID_SIZE = 6;
+            // Game constants - Modified to 6x5 grid
+            const GRID_COLS = 6;
+            const GRID_ROWS = 5; // Changed from 6 to 5
             const PATH_MOVE_TIME = 5; // seconds
             
             // Game state
             let gameState = {
                 grid: [],
                 heroes: [
-                    { name: 'Warrior', health: 100, attack: 12 },
-                    { name: 'Mage', health: 80, attack: 17 },
-                    { name: 'Healer', health: 70, attack: 9 }
+                    { name: 'Warrior', health: 100, attack: 13 },
+                    { name: 'Mage', health: 80, attack: 18 },
+                    { name: 'Healer', health: 70, attack: 10 }
                 ],
                 enemies: [
                     { name: 'Enemy', health: 100, maxHealth: 100, attack: 10 }
                 ],
-                health: 15680,
+                health: 15695,
                 maxHealth: 15705,
                 score: 0,
                 currentPath: [],
@@ -434,7 +435,8 @@
                 pathTimer: null,
                 pathTimeLeft: PATH_MOVE_TIME,
                 heldGem: null,  // The gem being carried during a move
-                gemElements: []
+                gemElements: [],
+                initialGrid: [] // Store the initial grid state for proper backtracking
             };
             
             // Get DOM elements
@@ -516,11 +518,11 @@
                 gameState.gemElements = [];
                 
                 // Create grid data structure
-                for (let row = 0; row < GRID_SIZE; row++) {
+                for (let row = 0; row < GRID_ROWS; row++) {
                     gameState.grid[row] = [];
                     gameState.gemElements[row] = [];
                     
-                    for (let col = 0; col < GRID_SIZE; col++) {
+                    for (let col = 0; col < GRID_COLS; col++) {
                         // Create a random gem
                         const randomIndex = Math.floor(Math.random() * GEM_TYPES.length);
                         const gemType = GEM_TYPES[randomIndex];
@@ -632,6 +634,9 @@
                 // Add the first gem to the path
                 gameState.currentPath.push({ row, col });
                 
+                // Store the starting grid state
+                gameState.initialGrid = JSON.parse(JSON.stringify(gameState.grid));
+                
                 // Store the picked-up gem (P&D style - you hold one gem)
                 gameState.heldGem = { ...gameState.grid[row][col] };
                 
@@ -665,7 +670,7 @@
                 const gemIndex = gameState.currentPath.findIndex(gem => gem.row === row && gem.col === col);
                 
                 if (gemIndex !== -1) {
-                    // Allow backtracking only to the previous gem
+                    // Allow backtracking only to the previous gem - Fixed backtracking logic
                     if (gemIndex === gameState.currentPath.length - 2) {
                         // Remove the last gem from the path
                         const removed = gameState.currentPath.pop();
@@ -838,39 +843,30 @@
             
             // Update gem positions in real-time as user drags (P&D style)
             function updateRealTimeGems() {
-                // If path is too short, nothing to do
-                if (gameState.currentPath.length <= 1) return;
+                if (gameState.currentPath.length === 0) return;
                 
-                // Create a temporary copy of the original grid
-                const tempGrid = [];
-                for (let row = 0; row < GRID_SIZE; row++) {
-                    tempGrid[row] = [];
-                    for (let col = 0; col < GRID_SIZE; col++) {
-                        tempGrid[row][col] = { ...gameState.grid[row][col] };
-                    }
-                }
+                // Start with the initial grid state
+                const tempGrid = JSON.parse(JSON.stringify(gameState.initialGrid));
                 
-                // P&D logic - you hold one gem and all others shift positions
+                // The first position is the starting gem, which we're "holding"
+                const heldGem = gameState.heldGem;
                 
-                // First position gets whatever was at the last position in path
-                const heldGem = gameState.heldGem; // The gem we're holding
-                const lastPosition = gameState.currentPath[gameState.currentPath.length - 1];
-                
-                // For each position in the path (except the last one)
-                for (let i = 0; i < gameState.currentPath.length - 1; i++) {
-                    const current = gameState.currentPath[i];
-                    const next = gameState.currentPath[i + 1];
+                // For each step in the path (except the first one), shift gems backward
+                for (let i = 1; i < gameState.currentPath.length; i++) {
+                    const prev = gameState.currentPath[i-1];
+                    const curr = gameState.currentPath[i];
                     
-                    // Move gem from next position to current position
-                    tempGrid[current.row][current.col] = { ...gameState.grid[next.row][next.col] };
+                    // Move gem from the current position to the previous position in the path
+                    tempGrid[prev.row][prev.col] = { ...gameState.initialGrid[curr.row][curr.col] };
                 }
                 
-                // Place held gem at the last position
-                tempGrid[lastPosition.row][lastPosition.col] = heldGem;
+                // Place the held gem at the last position in the path
+                const lastPos = gameState.currentPath[gameState.currentPath.length - 1];
+                tempGrid[lastPos.row][lastPos.col] = heldGem;
                 
                 // Update the UI based on the temporary grid
-                for (let row = 0; row < GRID_SIZE; row++) {
-                    for (let col = 0; col < GRID_SIZE; col++) {
+                for (let row = 0; row < GRID_ROWS; row++) {
+                    for (let col = 0; col < GRID_COLS; col++) {
                         const gemElement = gameState.gemElements[row][col];
                         const gem = tempGrid[row][col];
                         
@@ -907,33 +903,27 @@
                     return;
                 }
                 
-                // Create a temporary copy of the grid
-                const tempGrid = [];
-                for (let row = 0; row < GRID_SIZE; row++) {
-                    tempGrid[row] = [];
-                    for (let col = 0; col < GRID_SIZE; col++) {
-                        tempGrid[row][col] = { ...gameState.grid[row][col] };
-                    }
-                }
+                // Start with the initial grid state
+                const finalGrid = JSON.parse(JSON.stringify(gameState.initialGrid));
                 
-                // P&D logic - you hold one gem and all others shift positions
-                const heldGem = gameState.heldGem; // The gem we're holding
-                const lastPosition = gameState.currentPath[gameState.currentPath.length - 1];
+                // The first position is the starting gem, which we're "holding"
+                const heldGem = gameState.heldGem;
                 
-                // For each position in the path (except the last one)
-                for (let i = 0; i < gameState.currentPath.length - 1; i++) {
-                    const current = gameState.currentPath[i];
-                    const next = gameState.currentPath[i + 1];
+                // For each step in the path (except the first one), shift gems backward
+                for (let i = 1; i < gameState.currentPath.length; i++) {
+                    const prev = gameState.currentPath[i-1];
+                    const curr = gameState.currentPath[i];
                     
-                    // Move gem from next position to current position
-                    tempGrid[current.row][current.col] = { ...gameState.grid[next.row][next.col] };
+                    // Move gem from the current position to the previous position in the path
+                    finalGrid[prev.row][prev.col] = { ...gameState.initialGrid[curr.row][curr.col] };
                 }
                 
-                // Place held gem at the last position
-                tempGrid[lastPosition.row][lastPosition.col] = heldGem;
+                // Place the held gem at the last position in the path
+                const lastPos = gameState.currentPath[gameState.currentPath.length - 1];
+                finalGrid[lastPos.row][lastPos.col] = heldGem;
                 
                 // Update the game grid
-                gameState.grid = tempGrid;
+                gameState.grid = finalGrid;
                 
                 // Remove path visuals
                 clearPathVisuals();
@@ -975,6 +965,7 @@
                 // Reset path
                 gameState.currentPath = [];
                 gameState.heldGem = null;
+                gameState.initialGrid = [];
                 
                 // Update the UI to restore original state
                 updateGridUI();
@@ -993,8 +984,8 @@
             
             // Update the entire grid UI based on game state
             function updateGridUI() {
-                for (let row = 0; row < GRID_SIZE; row++) {
-                    for (let col = 0; col < GRID_SIZE; col++) {
+                for (let row = 0; row < GRID_ROWS; row++) {
+                    for (let col = 0; col < GRID_COLS; col++) {
                         const gemElement = gameState.gemElements[row][col];
                         const gem = gameState.grid[row][col];
                         
@@ -1014,8 +1005,8 @@
                 const matches = [];
                 
                 // Check horizontal matches
-                for (let row = 0; row < GRID_SIZE; row++) {
-                    for (let col = 0; col < GRID_SIZE - 2; col++) {
+                for (let row = 0; row < GRID_ROWS; row++) {
+                    for (let col = 0; col < GRID_COLS - 2; col++) {
                         if (!gameState.grid[row][col]) continue;
                         
                         const currentType = gameState.grid[row][col].id;
@@ -1031,7 +1022,7 @@
                             
                             // Extend match if more than 3 in a row
                             while (
-                                nextCol < GRID_SIZE && 
+                                nextCol < GRID_COLS && 
                                 gameState.grid[row][nextCol] &&
                                 gameState.grid[row][nextCol].id === currentType
                             ) {
@@ -1052,8 +1043,8 @@
                 }
                 
                 // Check vertical matches
-                for (let col = 0; col < GRID_SIZE; col++) {
-                    for (let row = 0; row < GRID_SIZE - 2; row++) {
+                for (let col = 0; col < GRID_COLS; col++) {
+                    for (let row = 0; row < GRID_ROWS - 2; row++) {
                         if (!gameState.grid[row][col]) continue;
                         
                         const currentType = gameState.grid[row][col].id;
@@ -1069,7 +1060,7 @@
                             
                             // Extend match if more than 3 in a row
                             while (
-                                nextRow < GRID_SIZE && 
+                                nextRow < GRID_ROWS && 
                                 gameState.grid[nextRow] && gameState.grid[nextRow][col] &&
                                 gameState.grid[nextRow][col].id === currentType
                             ) {
@@ -1176,19 +1167,19 @@
             function cascadeGems() {
                 // First, calculate how far each gem needs to fall
                 const fallDistances = [];
-                for (let row = 0; row < GRID_SIZE; row++) {
+                for (let row = 0; row < GRID_ROWS; row++) {
                     fallDistances[row] = [];
-                    for (let col = 0; col < GRID_SIZE; col++) {
+                    for (let col = 0; col < GRID_COLS; col++) {
                         fallDistances[row][col] = 0;
                     }
                 }
                 
                 // Calculate fall distances for each column
-                for (let col = 0; col < GRID_SIZE; col++) {
+                for (let col = 0; col < GRID_COLS; col++) {
                     let emptySpaces = 0;
                     
                     // Scan from bottom to top
-                    for (let row = GRID_SIZE - 1; row >= 0; row--) {
+                    for (let row = GRID_ROWS - 1; row >= 0; row--) {
                         if (gameState.grid[row][col] === null) {
                             emptySpaces++;
                         } else if (emptySpaces > 0) {
@@ -1198,8 +1189,8 @@
                 }
                 
                 // Apply falling animations to existing gems
-                for (let row = 0; row < GRID_SIZE; row++) {
-                    for (let col = 0; col < GRID_SIZE; col++) {
+                for (let row = 0; row < GRID_ROWS; row++) {
+                    for (let col = 0; col < GRID_COLS; col++) {
                         if (fallDistances[row][col] > 0 && gameState.grid[row][col] !== null) {
                             const gemElement = gameState.gemElements[row][col];
                             const newRow = row + fallDistances[row][col];
@@ -1223,12 +1214,12 @@
                 setTimeout(() => {
                     // Update the game state with cascaded gems
                     // Move existing gems down
-                    for (let col = 0; col < GRID_SIZE; col++) {
+                    for (let col = 0; col < GRID_COLS; col++) {
                         // Process from bottom to top to avoid overwriting
-                        const newColState = Array(GRID_SIZE).fill(null);
+                        const newColState = Array(GRID_ROWS).fill(null);
                         
                         // First move existing gems down
-                        for (let row = 0; row < GRID_SIZE; row++) {
+                        for (let row = 0; row < GRID_ROWS; row++) {
                             if (gameState.grid[row][col] !== null) {
                                 const newRow = row + fallDistances[row][col];
                                 newColState[newRow] = gameState.grid[row][col];
@@ -1236,7 +1227,7 @@
                         }
                         
                         // Now add new gems at the top
-                        for (let row = 0; row < GRID_SIZE; row++) {
+                        for (let row = 0; row < GRID_ROWS; row++) {
                             if (newColState[row] === null) {
                                 // Create a new random gem
                                 const randomIndex = Math.floor(Math.random() * GEM_TYPES.length);
@@ -1245,14 +1236,14 @@
                         }
                         
                         // Update this column in the game state
-                        for (let row = 0; row < GRID_SIZE; row++) {
+                        for (let row = 0; row < GRID_ROWS; row++) {
                             gameState.grid[row][col] = newColState[row];
                         }
                     }
                     
                     // Update the UI
-                    for (let row = 0; row < GRID_SIZE; row++) {
-                        for (let col = 0; col < GRID_SIZE; col++) {
+                    for (let row = 0; row < GRID_ROWS; row++) {
+                        for (let col = 0; col < GRID_COLS; col++) {
                             const gemElement = gameState.gemElements[row][col];
                             const gem = gameState.grid[row][col];
                             
