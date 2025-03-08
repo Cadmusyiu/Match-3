@@ -28,10 +28,10 @@
             padding: 0;
         }
         
-        /* Main container - fixed width and height for consistent display */
+        /* Main container - adjusted for better mobile fit */
         #game-container {
-            width: 375px;
-            height: 667px;
+            width: 350px;
+            height: 600px;
             background-color: #222;
             display: flex;
             flex-direction: column;
@@ -42,7 +42,7 @@
         }
         
         #dungeon-view {
-            height: 120px;
+            height: 110px;
             background-color: #333;
             position: relative;
             display: flex;
@@ -85,12 +85,12 @@
             justify-content: space-around;
             padding: 5px;
             background-color: #333;
-            height: 65px;
+            height: 60px;
         }
         
         .hero-card {
             width: 50px;
-            height: 55px;
+            height: 50px;
             background-color: #555;
             border-radius: 5px;
             border: 2px solid #777;
@@ -100,7 +100,7 @@
         }
         
         .hero-icon {
-            height: 35px;
+            height: 30px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -143,18 +143,20 @@
             width: 100%;
         }
         
-        /* Critical fix: Changed grid to 6x5 instead of 6x6 */
+        /* Changed grid to 5x5 (square) */
         #grid-container {
             flex-grow: 1;
             display: grid;
-            grid-template-columns: repeat(6, 1fr);
+            grid-template-columns: repeat(5, 1fr);
             grid-template-rows: repeat(5, 1fr);
             gap: 2px;
             padding: 2px;
             background-color: #111;
             position: relative;
             width: 100%;
-            height: calc(100% - 215px); /* Subtract header areas */
+            aspect-ratio: 1/1; /* Make it a perfect square */
+            margin: auto; /* Center vertically in the available space */
+            max-height: calc(100% - 200px); /* Subtract header areas */
         }
         
         .gem {
@@ -341,19 +343,35 @@
             100% { transform: scale(1); opacity: 1; }
         }
         
-        /* Media queries for different device sizes */
-        @media (max-height: 700px) {
+        /* Improved media queries for different device sizes */
+        @media (max-height: 650px) {
             #game-container {
                 height: 100vh;
-                width: auto;
-                aspect-ratio: 9/16;
+                width: 100vw;
+                max-width: 350px;
+            }
+            
+            #dungeon-view {
+                height: 90px;
+            }
+            
+            #heroes-area {
+                height: 50px;
+            }
+            
+            .hero-card {
+                height: 45px;
             }
         }
         
-        @media (max-width: 500px) {
+        @media (max-width: 360px) {
             #game-container {
                 width: 100vw;
                 height: 100vh;
+            }
+            
+            .gem {
+                font-size: 20px;
             }
         }
     </style>
@@ -411,8 +429,8 @@
     <script>
         // Wait for page to fully load
         window.onload = function() {
-            // Game constants - 6x5 grid
-            const GRID_COLS = 6;
+            // Game constants - Changed to 5x5 grid
+            const GRID_COLS = 5;
             const GRID_ROWS = 5;
             const PATH_MOVE_TIME = 5; // seconds
             
