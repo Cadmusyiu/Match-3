@@ -695,48 +695,74 @@
                 addPathVisual(row, col);
             }
             
-            // Add a gem to the current path
-            function addToPath(row, col) {
-                // If the path is empty, return
-                if (gameState.currentPath.length === 0) return;
+        // Add a gem to the current path
+        function addToPath(row, col) {
+            // If the path is empty, return
+            if (gameState.currentPath.length === 0) return;
+            
+            // Get the last gem in the path
+            const lastGem = gameState.currentPath[gameState.currentPath.length - 1];
+            
+            // Check if the new gem is adjacent to the last one
+            if (!areGemsAdjacent(lastGem.row, lastGem.col, row, col)) return;
+            
+            // Check if the gem is already in the path
+            const gemIndex = gameState.currentPath.findIndex(gem => gem.row === row && gem.col === col);
+            
+            if (gemIndex !== -1) {
+                // Allow backtracking to any previous position in the path
+                // First, store all gems that will be removed from the path
+                const removedGems = gameState.currentPath.slice(gemIndex + 1);
                 
-                // Get the last gem in the path
-                const lastGem = gameState.currentPath[gameState.currentPath.length - 1];
+                // Truncate the path back to the position we're returning to (plus one)
+                gameState.currentPath = gameState.currentPath.slice(0, gemIndex + 1);
                 
-                // Check if the new gem is adjacent to the last one
-                if (!areGemsAdjacent(lastGem.row, lastGem.col, row, col)) return;
+                // Remove the active class from all removed gems
+                removedGems.forEach(gem => {
+                    const gemElement = gameState.gemElements[gem.row][gem.col];
+                    gemElement.classList.remove('active');
+                });
                 
-                // Check if the gem is already in the path
-                const gemIndex = gameState.currentPath.findIndex(gem => gem.row === row && gem.col === col);
+                // Remove the corresponding path lines and dots
+                // We need to remove the lines and dots starting from the backtrack point
+                const lines = document.querySelectorAll('.path-line');
+                const dots = document.querySelectorAll('.path-dot');
                 
-                if (gemIndex !== -1) {
-                    // Allow backtracking only to the previous gem
-                    if (gemIndex === gameState.currentPath.length - 2) {
-                        // Remove the last gem from the path
-                        const removed = gameState.currentPath.pop();
-                        const removedElement = gameState.gemElements[removed.row][removed.col];
-                        removedElement.classList.remove('active');
-                        
-                        // Simple swap back the gems (just for visuals)
-                        swapGems(lastGem.row, lastGem.col, row, col);
-                        
-                        // Remove the last line
-                        const lines = document.querySelectorAll('.path-line');
-                        if (lines.length > 0) {
-                            lines[lines.length - 1].remove();
-                        }
-                        
-                        // Remove the last dot
-                        const dots = document.querySelectorAll('.path-dot');
-                        if (dots.length > 0) {
-                            dots[dots.length - 1].remove();
-                        }
-                        
-                        // Play swap sound for backtracking
-                        sounds.swap();
-                    }
-                    return;
+                // Remove lines from gemIndex position onwards
+                for (let i = lines.length - 1; i >= gemIndex; i--) {
+                    lines[i].remove();
                 }
+                
+                // Remove dots from gemIndex+1 position onwards (keep dot at backtrack position)
+                for (let i = dots.length - 1; i > gemIndex; i--) {
+                    dots[i].remove();
+                }
+                
+                // Play swap sound for backtracking
+                sounds.swap();
+                return;
+            }
+    
+    // Rest of the original function for adding a new gem to the path...
+    // Add the gem to the path
+    gameState.currentPath.push({ row, col });
+    
+    // Mark the gem as active
+    const gemElement = gameState.gemElements[row][col];
+    gemElement.classList.add('active');
+    
+    // Simple swap of gems (current implementation)
+    swapGems(lastGem.row, lastGem.col, row, col);
+    
+    // Draw line connecting to the previous gem
+    drawPathLine(lastGem.row, lastGem.col, row, col);
+    
+    // Add dot at the new position
+    addPathDot(row, col);
+    
+    // Play swap sound
+    sounds.swap();
+}
                 
                 // Add the gem to the path
                 gameState.currentPath.push({ row, col });
